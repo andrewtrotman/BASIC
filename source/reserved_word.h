@@ -9,6 +9,10 @@
 
 namespace BASIC
 	{
+	/*
+		CLASS RESERVED_WORD
+		-------------------
+	*/
 	class reserved_word
 		{
 		public:

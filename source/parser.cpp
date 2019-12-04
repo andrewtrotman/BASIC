@@ -4,6 +4,8 @@
 */
 #include <string.h>
 
+#include <algorithm>
+
 #include "parser.h"
 #include "reserved_word.h"
 
@@ -23,17 +25,17 @@ namespace BASIC
 			next_token_buffer[0] = '\0';
 		else
 			{
-			while (isspace(*where))
+			while (::isspace(*where))
 				where++;
 
 			const char *token_start = where;
-			if (isalpha(*where))
+			if (::isalpha(*where))
 				{
 				where++;
 				while (where < end && isalpha(*where))
 					where++;
 				}
-			else if (isdigit(*where))
+			else if (::isdigit(*where))
 				{
 				where++;
 				while (where < end && (isdigit(*where) || *where == '.'))
@@ -50,7 +52,7 @@ namespace BASIC
 			else
 				where++;
 
-			size_t length = where - token_start < next_token_buffer.size() ? where - token_start : next_token_buffer.size();
+			length = std::min(size_t(where - token_start), next_token_buffer.size());
 			std::copy(token_start, token_start + length, next_token_buffer.data());
 			next_token_buffer[length] = '\0';
 			}

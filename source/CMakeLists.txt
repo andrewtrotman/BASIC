@@ -4,6 +4,7 @@
 #
 
 set(BASIClib_FILES
+	error.h
 	parser.h
 	parser.cpp
 	parse_tree.h

@@ -13,16 +13,29 @@
 
 namespace BASIC
 	{
+	/*
+		CLASS PARSE_TREE
+		----------------
+	*/
 	class parse_tree
 		{
 		public:
+			/*
+				CLASS PARSE_TREE::NODE
+				----------------------
+			*/
 			class node
 				{
 				public:
+					/*
+						ENUM PARSE_TREE::NODE::NODE_TYPE
+						--------------------------------
+					*/
 					enum node_type
 						{
 						OPERATOR,
 						NUMBER,
+						STRING,
 						SYMBOL,
 						COMMAND
 						};
@@ -33,8 +46,13 @@ namespace BASIC
 					const char *operation;		// OPERATOR: is a reserved_word operator or command
 					double number;					// NUMBER: is a float
 					std::string symbol;			// SYMBOL: is a variable or other symbol (function call?)
+					std::string string;			// STRING: is a string
 					
 				public:
+					/*
+						PARSE_TREE::NODE::NODE()
+						------------------------
+					*/
 					node() :
 						left(nullptr),
 						right(nullptr),
@@ -46,11 +64,6 @@ namespace BASIC
 						/* Nothing */
 						}
 				};
-
-		public:
-			class error_syntax 				{ /* Nothing */ };
-			class error_division_by_zero 	{ /* Nothing */ };
-			class error_runtime 				{ /* Nothing */ };
 
 		protected:
 			parser parser;
@@ -71,7 +84,7 @@ namespace BASIC
 				}
 
 			std::shared_ptr<node> build(const std::string &string);
-			double evaluate(std::shared_ptr<parse_tree::node> root);
+			symbol evaluate(std::shared_ptr<parse_tree::node> root);
 		};
 
 	/*
@@ -90,6 +103,8 @@ namespace BASIC
 			stream << root->symbol;
 		else if (root->type == parse_tree::node::NUMBER)
 			stream << root->number;
+		else if (root->type == parse_tree::node::STRING)
+			stream << '"' << root->string << '"';
 		else if (root->type == parse_tree::node::OPERATOR)
 			stream << root->operation;
 		else if (root->type == parse_tree::node::COMMAND)

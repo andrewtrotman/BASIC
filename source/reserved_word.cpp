@@ -38,6 +38,9 @@ namespace BASIC
 		{std::string(POWER), POWER},
 		};
 
+	/*
+		operator precidence matrix
+	*/
 	const std::unordered_map<const char *, size_t> reserved_word::all_precidence =
 		{
 		{CLOSE_BRACKET, 1},
@@ -50,6 +53,9 @@ namespace BASIC
 		{EQUALS, 10},
 		};
 
+	/*
+		operator matrix
+	*/
 	const std::unordered_map<const char *, bool> reserved_word::all_operators =
 		{
 		{PLUS, true},

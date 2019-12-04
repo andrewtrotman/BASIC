@@ -5,6 +5,7 @@
 #include <math.h>
 #include <ctype.h>
 
+#include "error.h"
 #include "parser.h"
 #include "parse_tree.h"
 #include "reserved_word.h"
@@ -24,7 +25,7 @@ namespace BASIC
 			std::shared_ptr<node> child = build();
 			auto close = reserved_word::translate(parser.get_next_token());		//consume the close bracket.
 			if (close != reserved_word::CLOSE_BRACKET)
-				throw error_syntax();
+				throw error::syntax();
 			return child;
 			}
 		else if (::isdigit(*token))
@@ -41,8 +42,16 @@ namespace BASIC
 			new_node->symbol = std::string(token);
 			return new_node;
 			}
+		else if (*token == '"')
+			{
+			std::shared_ptr<node> new_node(new node);
+			new_node->type = node::STRING;
+			new_node->string = std::string(token);
+			new_node->string = new_node->string.substr(1, new_node->string.length() - 2);
+			return new_node;
+			}
 		else
-			throw error_syntax();
+			throw error::syntax();
 		}
 
 	/*
@@ -60,7 +69,7 @@ namespace BASIC
 			return new_node;
 			}
 		else
-			throw error_syntax();
+			throw error::syntax();
 		}
 
 	/*
@@ -140,7 +149,7 @@ namespace BASIC
 			print->operation = reserved_word::PRINT;
 			print->right = build();
 			if (*parser.peek_next_token() != '\0')
-				throw error_syntax();
+				throw error::syntax();
 			return print;
 			}
 		else
@@ -151,7 +160,7 @@ namespace BASIC
 			std::string variable = reserved_word::translate(parser.get_next_token());
 			auto equal = reserved_word::translate(parser.get_next_token());
 			if (equal != reserved_word::EQUALS)
-				throw error_syntax();
+				throw error::syntax();
 
 			std::shared_ptr<parse_tree::node> let(new node);
 			let->type = node::COMMAND;
@@ -162,7 +171,7 @@ namespace BASIC
 
 			let->right = build();
 			if (*parser.peek_next_token() != '\0')
-				throw error_syntax();
+				throw error::syntax();
 
 			return let;
 			}
@@ -172,14 +181,17 @@ namespace BASIC
 		PARSE_TREE::EVALUATE()
 		----------------------
 	*/
-	double parse_tree::evaluate(std::shared_ptr<parse_tree::node> root)
+	symbol parse_tree::evaluate(std::shared_ptr<parse_tree::node> root)
 		{
 		if (root->type == node::COMMAND)
 			{
 			if (root->operation == reserved_word::PRINT)
 				{
 				auto value = evaluate(root->right);
-				std::cout << value << "\n";
+				if (value.isstring())
+					std::cout << (std::string)value << "\n";
+				else
+					std::cout << (double)value << "\n";
 				return value;
 				}
 			else if (root->operation == reserved_word::EQUALS)
@@ -191,10 +203,12 @@ namespace BASIC
 			else
 				return 0;
 			}
+		else if (root->type == node::STRING)
+			return root->string;
 		else if (root->type == node::NUMBER)
 			return root->number;
 		else if (root->type == node::SYMBOL)
-			return symbol_table[root->symbol].value;
+			return symbol_table[root->symbol];
 		else if (root->type == node::OPERATOR)
 			{
 			auto left = evaluate(root->left);
@@ -206,15 +220,11 @@ namespace BASIC
 			else if (root->operation == reserved_word::MULTIPLY)
 				return left * right;
 			else if (root->operation == reserved_word::DIVIDE)
-				{
-				if (right == 0)								// FIX check properly.
-					throw error_division_by_zero();
 				return left / right;
-				}
 			else if (root->operation == reserved_word::POWER)
 				return pow(left, right);
 			else
-				throw error_runtime();
+				throw error::runtime();
 			}
 		else
 			return 0;

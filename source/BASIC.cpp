@@ -36,6 +36,13 @@ int main(int argc, char *argv[])
 		program[20] = parser.build("print x + 1");
 		program[30] = parser.build("x = x + x");
 		program[40] = parser.build("print x + 1");
+		program[50] = parser.build("print \"Hello\"");
+		program[60] = parser.build("z = \"Hello\"");
+		program[70] = parser.build("print z");
+		program[70] = parser.build("z = z + \"X\"");
+		program[80] = parser.build("print z + x");
+		program[85] = parser.build("a = 1");
+		program[90] = parser.build("print 1 / a");
 
 		for (const auto &[line, command] : program)
 			{
@@ -43,15 +50,15 @@ int main(int argc, char *argv[])
 			parser.evaluate(command);
 			}
 		}
-	catch (BASIC::parse_tree::error_syntax)
+	catch (BASIC::error::syntax)
 		{
 		std::cout << "SYNTAX ERROR\n\n";
 		}
-	catch (BASIC::parse_tree::error_runtime)
+	catch (BASIC::error::runtime)
 		{
 		std::cout << "RUNTIME ERROR\n\n";
 		}
-	catch (BASIC::parse_tree::error_division_by_zero)
+	catch (BASIC::error::division_by_zero)
 		{
 		std::cout << "DIVISION BY ZERO\n\n";
 		}
