@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 	//	line = "2 * (3 + (4)) * 5";				// ((2*(3+4))*5)
 	//	line = "2 * (something + (else)) * more";
 	//	line = "2 * something + (else)";
-
+#ifdef NEVER
 		program[10] = parser.build("x = 2^6");
 		program[20] = parser.build("print x + 1");
 		program[30] = parser.build("x = x + x");
@@ -42,7 +42,10 @@ int main(int argc, char *argv[])
 		program[70] = parser.build("z = z + \"X\"");
 		program[80] = parser.build("print z + x");
 		program[85] = parser.build("a = 1");
-		program[90] = parser.build("print 1 / a");
+		program[90] = parser.build("print -1 / a");
+#endif
+		program[100] = parser.build("print --1");
+
 
 		for (const auto &[line, command] : program)
 			{

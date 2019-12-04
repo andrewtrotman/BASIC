@@ -29,6 +29,8 @@ namespace BASIC
 			static const char *MULTIPLY;
 			static const char *DIVIDE;
 			static const char *POWER;
+			static const char *UNARY_PLUS;
+			static const char *UNARY_MINUS;
 
 			/*
 				Map from a string to a reserved word

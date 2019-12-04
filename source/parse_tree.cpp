@@ -50,6 +50,22 @@ namespace BASIC
 			new_node->string = new_node->string.substr(1, new_node->string.length() - 2);
 			return new_node;
 			}
+		else if (token == reserved_word::MINUS)			// Unary minus
+			{
+			std::shared_ptr<node> new_node(new node);
+			new_node->type = node::OPERATOR;
+			new_node->operation = reserved_word::UNARY_MINUS;
+			new_node->right = build_operand();
+			return new_node;
+			}
+		else if (token == reserved_word::PLUS)			// Unary plus
+			{
+			std::shared_ptr<node> new_node(new node);
+			new_node->type = node::OPERATOR;
+			new_node->operation = reserved_word::UNARY_PLUS;
+			new_node->right = build_operand();
+			return new_node;
+			}
 		else
 			throw error::syntax();
 		}
@@ -183,6 +199,9 @@ namespace BASIC
 	*/
 	symbol parse_tree::evaluate(std::shared_ptr<parse_tree::node> root)
 		{
+		if (root == nullptr)
+			return 0;
+
 		if (root->type == node::COMMAND)
 			{
 			if (root->operation == reserved_word::PRINT)
@@ -223,6 +242,10 @@ namespace BASIC
 				return left / right;
 			else if (root->operation == reserved_word::POWER)
 				return pow(left, right);
+			else if (root->operation == reserved_word::UNARY_PLUS)
+				return right;
+			else if (root->operation == reserved_word::UNARY_MINUS)
+				return -(double)right;
 			else
 				throw error::runtime();
 			}

@@ -11,7 +11,6 @@ namespace BASIC
 	*/
 	const char *reserved_word::PRINT = "print";
 	const char *reserved_word::LET = "let";
-
 	const char *reserved_word::EQUALS = "=";
 	const char *reserved_word::OPEN_BRACKET = "(";
 	const char *reserved_word::CLOSE_BRACKET = ")";
@@ -20,6 +19,8 @@ namespace BASIC
 	const char *reserved_word::MULTIPLY = "*";
 	const char *reserved_word::DIVIDE = "/";
 	const char *reserved_word::POWER = "^";
+	const char *reserved_word::UNARY_PLUS = " +";
+	const char *reserved_word::UNARY_MINUS = " -";
 
 	/*
 		Translation matrix
