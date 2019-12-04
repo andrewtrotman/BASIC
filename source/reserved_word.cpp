@@ -10,6 +10,7 @@ namespace BASIC
 		Reserved words
 	*/
 	const char *reserved_word::PRINT = "print";
+	const char *reserved_word::LET = "let";
 
 	const char *reserved_word::EQUALS = "=";
 	const char *reserved_word::OPEN_BRACKET = "(";
@@ -25,6 +26,7 @@ namespace BASIC
 	*/
 	const std::unordered_map<std::string, const char *> reserved_word::all_reserved_words =
 		{
+		{std::string(LET), LET},
 		{std::string(PRINT), PRINT},
 		{std::string(EQUALS), EQUALS},
 		{std::string(OPEN_BRACKET), OPEN_BRACKET},
@@ -35,7 +37,6 @@ namespace BASIC
 		{std::string(DIVIDE), DIVIDE},
 		{std::string(POWER), POWER},
 		};
-
 
 	const std::unordered_map<const char *, size_t> reserved_word::all_precidence =
 		{
@@ -57,7 +58,6 @@ namespace BASIC
 		{DIVIDE, true},
 		{POWER, true},
 		};
-
 
 	/*
 		RESERVED_WORD::TRANSLATE()

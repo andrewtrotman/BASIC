@@ -8,12 +8,14 @@
 #include <iostream>
 
 #include "parser.h"
+#include "symbol_table.h"
+#include "reserved_word.h"
 
 namespace BASIC
 	{
 	class parse_tree
 		{
-		private:
+		public:
 			class node
 				{
 				public:
@@ -21,13 +23,14 @@ namespace BASIC
 						{
 						OPERATOR,
 						NUMBER,
-						SYMBOL
+						SYMBOL,
+						COMMAND
 						};
 				public:
 					std::shared_ptr<node> left;
 					std::shared_ptr<node> right;
 					node_type type;
-					const char *operation;		// OPERATOR: is a reserved_word or a symbol
+					const char *operation;		// OPERATOR: is a reserved_word operator or command
 					double number;					// NUMBER: is a float
 					std::string symbol;			// SYMBOL: is a variable or other symbol (function call?)
 					
@@ -51,6 +54,7 @@ namespace BASIC
 
 		protected:
 			parser parser;
+			symbol_table symbol_table;
 			
 		protected:
 			std::shared_ptr<node> build(void);
@@ -88,6 +92,13 @@ namespace BASIC
 			stream << root->number;
 		else if (root->type == parse_tree::node::OPERATOR)
 			stream << root->operation;
+		else if (root->type == parse_tree::node::COMMAND)
+			{
+			if (root->operation == reserved_word::PRINT)
+				stream << "PRINT ";
+			if (root->operation == reserved_word::EQUALS)
+				stream << " = ";
+			}
 
 		if (root->right != nullptr)
 			stream << root->right;

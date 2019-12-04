@@ -16,6 +16,7 @@ namespace BASIC
 				List of known reserved words
 			*/
 			static const char *PRINT;
+			static const char *LET;
 			static const char *EQUALS;
 			static const char *OPEN_BRACKET;
 			static const char *CLOSE_BRACKET;

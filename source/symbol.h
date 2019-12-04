@@ -17,7 +17,19 @@ namespace BASIC
 
 		public:
 			symbol_type type;
-			std::string name;
 			double value;
+
+		public:
+			symbol()
+				{
+				/* Nothing */
+				}
+
+			symbol(double value) :
+				type(NUMERIC),
+				value(value)
+				{
+				/* Nothing */
+				}
 		};
 	}

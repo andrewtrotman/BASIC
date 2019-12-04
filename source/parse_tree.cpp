@@ -127,11 +127,45 @@ namespace BASIC
 	std::shared_ptr<parse_tree::node> parse_tree::build(const std::string &string)
 		{
 		parser.set_document(string);
-		auto answer = build();
-		if (*parser.peek_next_token() != '\0')
-			throw error_syntax();
 
-		return answer;
+		auto command = reserved_word::translate(parser.peek_next_token());
+		if (command == reserved_word::PRINT)
+			{
+			/*
+				We've got a print statement.
+			*/
+			parser.get_next_token();
+			std::shared_ptr<parse_tree::node> print(new node);
+			print->type = node::COMMAND;
+			print->operation = reserved_word::PRINT;
+			print->right = build();
+			if (*parser.peek_next_token() != '\0')
+				throw error_syntax();
+			return print;
+			}
+		else
+			{
+			/*
+				We've got a symbol so its an assignment statemnent.
+			*/
+			std::string variable = reserved_word::translate(parser.get_next_token());
+			auto equal = reserved_word::translate(parser.get_next_token());
+			if (equal != reserved_word::EQUALS)
+				throw error_syntax();
+
+			std::shared_ptr<parse_tree::node> let(new node);
+			let->type = node::COMMAND;
+			let->operation = reserved_word::EQUALS;
+			let->left = std::make_shared<parse_tree::node>();
+			let->left->type = node::SYMBOL;
+			let->left->symbol = variable;
+
+			let->right = build();
+			if (*parser.peek_next_token() != '\0')
+				throw error_syntax();
+
+			return let;
+			}
 		}
 
 	/*
@@ -140,10 +174,27 @@ namespace BASIC
 	*/
 	double parse_tree::evaluate(std::shared_ptr<parse_tree::node> root)
 		{
-		if (root->type == node::NUMBER)
+		if (root->type == node::COMMAND)
+			{
+			if (root->operation == reserved_word::PRINT)
+				{
+				auto value = evaluate(root->right);
+				std::cout << value << "\n";
+				return value;
+				}
+			else if (root->operation == reserved_word::EQUALS)
+				{
+				auto value = evaluate(root->right);
+				symbol_table[root->left->symbol] = symbol(value);
+				return value;
+				}
+			else
+				return 0;
+			}
+		else if (root->type == node::NUMBER)
 			return root->number;
 		else if (root->type == node::SYMBOL)
-			return 1;											// FIX resolve against the symbol table
+			return symbol_table[root->symbol].value;
 		else if (root->type == node::OPERATOR)
 			{
 			auto left = evaluate(root->left);
