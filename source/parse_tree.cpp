@@ -5,8 +5,6 @@
 #include <math.h>
 #include <ctype.h>
 
-#include <iostream>
-
 #include "parser.h"
 #include "parse_tree.h"
 #include "reserved_word.h"
@@ -128,7 +126,6 @@ namespace BASIC
 	*/
 	std::shared_ptr<parse_tree::node> parse_tree::build(const std::string &string)
 		{
-		std::cout << string << " -> ";
 		parser.set_document(string);
 		auto answer = build();
 		if (*parser.peek_next_token() != '\0')
@@ -136,7 +133,6 @@ namespace BASIC
 
 		return answer;
 		}
-
 
 	/*
 		PARSE_TREE::EVALUATE()

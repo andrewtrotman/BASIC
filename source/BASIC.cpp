@@ -32,10 +32,9 @@ try
 
 
 		auto tree = parser.build(line);
-
 		auto answer = parser.evaluate(tree);
 
-		std::cout << tree << " = " << answer << "\n\n";
+		std::cout << line << " -> " << tree << " = " << answer << "\n\n";
 
 		}
 	catch (BASIC::parse_tree::error_syntax)
