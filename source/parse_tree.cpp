@@ -131,11 +131,12 @@ namespace BASIC
 		{
 		std::shared_ptr<parse_tree::node> left = build_operand();
 
-		while (1)
+		const char *token;
+		do
 			{
  			std::shared_ptr<parse_tree::node> root = build_tree(left);
 
-			auto token = reserved_word::translate(parser.peek_next_token());
+			token = reserved_word::translate(parser.peek_next_token());
 			if (reserved_word::precidence(token) == 0)
 				return root;
 			if (token == reserved_word::CLOSE_BRACKET)
@@ -143,6 +144,63 @@ namespace BASIC
 
 			left = root;
  			}
+		while (reserved_word::isoperator(token));
+
+		return left;
+		}
+
+	/*
+		PARSE_TREE::PARSE_PRINT()
+		-------------------------
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_print(void)
+		{
+		parser.get_next_token();
+		std::shared_ptr<parse_tree::node> print(new node);
+		print->type = node::COMMAND;
+		print->operation = reserved_word::PRINT;
+		print->right = build();
+
+		auto token = parser.peek_next_token();
+		if (*token == '\0')
+			return print;
+		else if (*token == ';')
+			{
+			parser.get_next_token();
+			print->attribute = node::NO_CR_LF;
+			}
+		else
+			throw error::syntax();
+
+		return print;
+		}
+
+	/*
+		PARSE_TREE::PARSE_LET()
+		-----------------------
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_let(void)
+		{
+		/*
+			We've got a symbol so its an assignment statemnent.
+		*/
+		std::string variable = reserved_word::translate(parser.get_next_token());
+		auto equal = reserved_word::translate(parser.get_next_token());
+		if (equal != reserved_word::EQUALS)
+			throw error::syntax();
+
+		std::shared_ptr<parse_tree::node> let(new node);
+		let->type = node::COMMAND;
+		let->operation = reserved_word::EQUALS;
+		let->left = std::make_shared<parse_tree::node>();
+		let->left->type = node::SYMBOL;
+		let->left->symbol = variable;
+
+		let->right = build();
+		if (*parser.peek_next_token() != '\0')
+			throw error::syntax();
+
+		return let;
 		}
 
 	/*
@@ -155,42 +213,10 @@ namespace BASIC
 
 		auto command = reserved_word::translate(parser.peek_next_token());
 		if (command == reserved_word::PRINT)
-			{
-			/*
-				We've got a print statement.
-			*/
-			parser.get_next_token();
-			std::shared_ptr<parse_tree::node> print(new node);
-			print->type = node::COMMAND;
-			print->operation = reserved_word::PRINT;
-			print->right = build();
-			if (*parser.peek_next_token() != '\0')
-				throw error::syntax();
-			return print;
-			}
+			return parse_print();
 		else
-			{
-			/*
-				We've got a symbol so its an assignment statemnent.
-			*/
-			std::string variable = reserved_word::translate(parser.get_next_token());
-			auto equal = reserved_word::translate(parser.get_next_token());
-			if (equal != reserved_word::EQUALS)
-				throw error::syntax();
+			return parse_let();
 
-			std::shared_ptr<parse_tree::node> let(new node);
-			let->type = node::COMMAND;
-			let->operation = reserved_word::EQUALS;
-			let->left = std::make_shared<parse_tree::node>();
-			let->left->type = node::SYMBOL;
-			let->left->symbol = variable;
-
-			let->right = build();
-			if (*parser.peek_next_token() != '\0')
-				throw error::syntax();
-
-			return let;
-			}
 		}
 
 	/*
@@ -208,9 +234,11 @@ namespace BASIC
 				{
 				auto value = evaluate(root->right);
 				if (value.isstring())
-					std::cout << (std::string)value << "\n";
+					std::cout << (std::string)value;
 				else
-					std::cout << (double)value << "\n";
+					std::cout << (double)value;
+				if (!(root->attribute & node::NO_CR_LF))
+					std::cout << '\n';
 				return value;
 				}
 			else if (root->operation == reserved_word::EQUALS)
