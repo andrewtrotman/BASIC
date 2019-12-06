@@ -40,21 +40,11 @@ namespace BASIC
 						COMMAND
 						};
 
-					/*
-						ENUM PARSE_TREE::NODE::NODE_ATTRIBUTE
-						-------------------------------------
-					*/
-					enum node_attribute
-						{
-						NONE,
-						NO_CR_LF
-						};
 
 				public:
 					std::shared_ptr<node> left;
 					std::shared_ptr<node> right;
 					node_type type;
-					node_attribute attribute;
 					const char *operation;		// OPERATOR: is a reserved_word operator or command
 					double number;					// NUMBER: is a float
 					std::string symbol;			// SYMBOL: is a variable or other symbol (function call?)
@@ -69,7 +59,6 @@ namespace BASIC
 						left(nullptr),
 						right(nullptr),
 						type(SYMBOL),
-						attribute(NONE),
 						operation(nullptr),
 						number(0),
 						symbol("")
@@ -90,6 +79,8 @@ namespace BASIC
 
 			std::shared_ptr<node> parse_print(void);
 			std::shared_ptr<node> parse_let(void);
+
+			bool evaluate_print(std::shared_ptr<node> root);
 
 		friend std::ostream &operator<<(std::ostream &stream, const std::shared_ptr<parse_tree::node> root);
 

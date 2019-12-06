@@ -12,6 +12,9 @@ namespace BASIC
 	const char *reserved_word::PRINT = "print";
 	const char *reserved_word::LET = "let";
 	const char *reserved_word::EQUALS = "=";
+	const char *reserved_word::COMMA = ",";
+	const char *reserved_word::QUESTIONMARK = "?";
+	const char *reserved_word::SEMICOLON = ";";
 	const char *reserved_word::OPEN_BRACKET = "(";
 	const char *reserved_word::CLOSE_BRACKET = ")";
 	const char *reserved_word::PLUS = "+";
@@ -27,6 +30,9 @@ namespace BASIC
 	*/
 	const std::unordered_map<std::string, const char *> reserved_word::all_reserved_words =
 		{
+		{std::string(COMMA), COMMA},
+		{std::string(SEMICOLON), SEMICOLON},
+		{std::string(QUESTIONMARK), QUESTIONMARK},
 		{std::string(LET), LET},
 		{std::string(PRINT), PRINT},
 		{std::string(EQUALS), EQUALS},

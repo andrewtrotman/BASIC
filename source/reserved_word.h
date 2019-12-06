@@ -21,6 +21,9 @@ namespace BASIC
 			*/
 			static const char *PRINT;
 			static const char *LET;
+			static const char *COMMA;
+			static const char *SEMICOLON;
+			static const char *QUESTIONMARK;
 			static const char *EQUALS;
 			static const char *OPEN_BRACKET;
 			static const char *CLOSE_BRACKET;

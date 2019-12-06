@@ -31,20 +31,24 @@ int main(int argc, char *argv[])
 	//	line = "2 * (3 + (4)) * 5";				// ((2*(3+4))*5)
 	//	line = "2 * (something + (else)) * more";
 	//	line = "2 * something + (else)";
-//#ifdef NEVER
 		program[10] = parser.build("x = 2^6");
 		program[20] = parser.build("print x + 1");
 		program[30] = parser.build("x = x + x");
 		program[40] = parser.build("print x + 1");
 		program[50] = parser.build("print \"Hello\"");
 		program[60] = parser.build("z = \"Hello\"");
-		program[65] = parser.build("print z;");
+		program[65] = parser.build("print z");
 		program[70] = parser.build("z = z + \" X \"");
 		program[80] = parser.build("print z + x");
 		program[85] = parser.build("a = 1");
 		program[90] = parser.build("print -1 / a");
 		program[100] = parser.build("print --1");
-//#endif
+		program[105] = parser.build("print \".\"");
+		program[110] = parser.build("print \"H\";\"E\";X,");
+		program[115] = parser.build("print \"H\";\"E\";X");
+		program[120] = parser.build("?x,x;x;x");
+		program[130] = parser.build("?,x,x;x;x");
+		program[140] = parser.build("?,,x,x;x;x");
 
 
 		for (const auto &[line, command] : program)

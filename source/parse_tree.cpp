@@ -155,20 +155,32 @@ namespace BASIC
 	*/
 	std::shared_ptr<parse_tree::node> parse_tree::parse_print(void)
 		{
-		parser.get_next_token();
 		std::shared_ptr<parse_tree::node> print(new node);
+
+		parser.get_next_token();
 		print->type = node::COMMAND;
 		print->operation = reserved_word::PRINT;
-		print->right = build();
 
-		auto token = parser.peek_next_token();
+		auto token = reserved_word::translate(parser.peek_next_token());
 		if (*token == '\0')
 			return print;
-		else if (*token == ';')
+
+		if (token != reserved_word::COMMA && token != reserved_word::SEMICOLON)
+			print->left = build();
+
+		token = reserved_word::translate(parser.peek_next_token());
+		if (token == reserved_word::COMMA)
 			{
-			parser.get_next_token();
-			print->attribute = node::NO_CR_LF;
+			print->right = parse_print();
+			print->right->operation = reserved_word::COMMA;
 			}
+		else if (token == reserved_word::SEMICOLON)
+			{
+			print->right = parse_print();
+			print->right->operation = reserved_word::SEMICOLON;
+			}
+		else if (*token == '\0')
+			return print;
 		else
 			throw error::syntax();
 
@@ -214,9 +226,38 @@ namespace BASIC
 		auto command = reserved_word::translate(parser.peek_next_token());
 		if (command == reserved_word::PRINT)
 			return parse_print();
+		else if (command == reserved_word::QUESTIONMARK)
+			return parse_print();
 		else
 			return parse_let();
+		}
 
+	/*
+		PARSE_TREE::EVALUATE_PRINT()
+		----------------------------
+		return true on print cr/lf
+	*/
+	bool parse_tree::evaluate_print(std::shared_ptr<parse_tree::node> root)
+		{
+		if (root->operation == reserved_word::COMMA)
+			std::cout << "\t";
+		if (root->left == nullptr && root->right == nullptr)  // we end with a semiolon or a comma
+			return false;
+
+		if (root->left != nullptr)
+			{
+			auto value = evaluate(root->left);
+
+			if (value.isstring())
+				std::cout << (std::string)value;
+			else
+				std::cout << (double)value;
+			}
+
+		if (root->right != nullptr)
+			return evaluate_print(root->right);
+
+		return true;
 		}
 
 	/*
@@ -232,14 +273,9 @@ namespace BASIC
 			{
 			if (root->operation == reserved_word::PRINT)
 				{
-				auto value = evaluate(root->right);
-				if (value.isstring())
-					std::cout << (std::string)value;
-				else
-					std::cout << (double)value;
-				if (!(root->attribute & node::NO_CR_LF))
-					std::cout << '\n';
-				return value;
+				if (evaluate_print(root))
+					std::cout << "\n";
+				return 0;
 				}
 			else if (root->operation == reserved_word::EQUALS)
 				{
