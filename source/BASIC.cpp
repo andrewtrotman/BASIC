@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 	//	line = "2 * (3 + (4)) * 5";				// ((2*(3+4))*5)
 	//	line = "2 * (something + (else)) * more";
 	//	line = "2 * something + (else)";
+#ifdef NEVER
 		program[10] = parser.build("x = 2^6");
 		program[20] = parser.build("print x + 1");
 		program[30] = parser.build("x = x + x");
@@ -49,6 +50,16 @@ int main(int argc, char *argv[])
 		program[120] = parser.build("?x,x;x;x");
 		program[130] = parser.build("?,x,x;x;x");
 		program[140] = parser.build("?,,x,x;x;x");
+		program[150] = parser.build("?");
+		program[160] = parser.build("?");
+		program[200] = parser.build("? \"END\"");
+#endif
+
+//			program[10] = parser.build("input");
+//			program[20] = parser.build("input \"->\"");
+			program[30] = parser.build("input \"->\"; a");
+			program[40] = parser.build("? a");
+
 
 
 		for (const auto &[line, command] : program)
@@ -68,6 +79,10 @@ int main(int argc, char *argv[])
 	catch (BASIC::error::division_by_zero)
 		{
 		std::cout << "DIVISION BY ZERO\n\n";
+		}
+	catch (BASIC::error::extra_ignored)
+		{
+		std::cout << "EXTRA IGNORED\n\n";
 		}
 	catch (...)
 		{

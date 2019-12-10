@@ -19,6 +19,7 @@ namespace BASIC
 			/*
 				List of known reserved words
 			*/
+			static const char *INPUT;
 			static const char *PRINT;
 			static const char *LET;
 			static const char *COMMA;

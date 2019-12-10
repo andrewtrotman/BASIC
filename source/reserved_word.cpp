@@ -9,6 +9,7 @@ namespace BASIC
 	/*
 		Reserved words
 	*/
+	const char *reserved_word::INPUT = "input";
 	const char *reserved_word::PRINT = "print";
 	const char *reserved_word::LET = "let";
 	const char *reserved_word::EQUALS = "=";
@@ -34,6 +35,7 @@ namespace BASIC
 		{std::string(SEMICOLON), SEMICOLON},
 		{std::string(QUESTIONMARK), QUESTIONMARK},
 		{std::string(LET), LET},
+		{std::string(INPUT), INPUT},
 		{std::string(PRINT), PRINT},
 		{std::string(EQUALS), EQUALS},
 		{std::string(OPEN_BRACKET), OPEN_BRACKET},
@@ -57,7 +59,6 @@ namespace BASIC
 		{DIVIDE, 3},
 		{POWER, 4},
 		{OPEN_BRACKET, 5},
-		{EQUALS, 10},
 		};
 
 	/*

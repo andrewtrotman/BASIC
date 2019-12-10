@@ -188,6 +188,52 @@ namespace BASIC
 		}
 
 	/*
+		PARSE_TREE::PARSE_INPUT()
+		-------------------------
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_input(void)
+		{
+		std::shared_ptr<parse_tree::node> command(new node);
+
+		parser.get_next_token();
+		command->type = node::COMMAND;
+		command->operation = reserved_word::INPUT;
+		command->left = std::shared_ptr<parse_tree::node>(new node);
+
+		auto token = reserved_word::translate(parser.peek_next_token());
+		if (*token == '\0')
+			return command;
+		else if (*token == '"')
+			command->left->string = parser.get_next_token();
+		else
+			command->left->string = "?";
+
+		token = reserved_word::translate(parser.peek_next_token());
+		if (token == reserved_word::SEMICOLON)
+			{
+			auto at = command;
+			do
+				{
+				parser.get_next_token();			// read the semicolon or comma
+				at->right = std::shared_ptr<parse_tree::node>(new node);
+				at = at->right;
+				at->type = node::SYMBOL;
+				auto variable = parser.get_next_token();
+				at->symbol = variable;
+				token = reserved_word::translate(parser.peek_next_token());
+				}
+			while (token == reserved_word::COMMA);
+			}
+		else
+			throw error::syntax();
+
+		if (*token != '\0')
+			throw error::syntax();
+
+		return command;
+		}
+
+	/*
 		PARSE_TREE::PARSE_LET()
 		-----------------------
 	*/
@@ -228,6 +274,8 @@ namespace BASIC
 			return parse_print();
 		else if (command == reserved_word::QUESTIONMARK)
 			return parse_print();
+		else if (command == reserved_word::INPUT)
+			return parse_input();
 		else
 			return parse_let();
 		}
@@ -242,7 +290,12 @@ namespace BASIC
 		if (root->operation == reserved_word::COMMA)
 			std::cout << "\t";
 		if (root->left == nullptr && root->right == nullptr)  // we end with a semiolon or a comma
-			return false;
+			{
+			if (root->operation == reserved_word::PRINT)
+				return true;
+			else
+				return false;
+			}
 
 		if (root->left != nullptr)
 			{
@@ -261,6 +314,29 @@ namespace BASIC
 		}
 
 	/*
+		PARSE_TREE::EVALUATE_INPUT()
+		----------------------------
+		return true on print cr/lf
+	*/
+	void parse_tree::evaluate_input(std::shared_ptr<parse_tree::node> root)
+		{
+		char input[1024];
+
+		std::cout << root->left->string;
+		fgets(input, sizeof(input), stdin);
+
+		for (char *token = strtok(input, ",\n\r"); token != nullptr; token = strtok(NULL, ",\n\r"))
+			{
+			root = root->right;
+			if (root == nullptr)
+				throw error::runtime();
+			symbol_table[root->symbol] = std::string(token);
+			}
+		if (root != nullptr)
+			throw error::extra_ignored();
+		}
+
+	/*
 		PARSE_TREE::EVALUATE()
 		----------------------
 	*/
@@ -275,16 +351,15 @@ namespace BASIC
 				{
 				if (evaluate_print(root))
 					std::cout << "\n";
-				return 0;
 				}
+			else if (root->operation == reserved_word::INPUT)
+				evaluate_input(root);
 			else if (root->operation == reserved_word::EQUALS)
 				{
 				auto value = evaluate(root->right);
 				symbol_table[root->left->symbol] = symbol(value);
-				return value;
 				}
-			else
-				return 0;
+			return 0;
 			}
 		else if (root->type == node::STRING)
 			return root->string;

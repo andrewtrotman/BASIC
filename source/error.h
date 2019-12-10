@@ -16,5 +16,6 @@ namespace BASIC
 			class syntax 				{ /* Nothing */ };
 			class division_by_zero 	{ /* Nothing */ };
 			class runtime 				{ /* Nothing */ };
+			class extra_ignored 		{ /* Nothing */ };
 		};
 	}

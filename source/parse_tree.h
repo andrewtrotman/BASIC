@@ -77,9 +77,11 @@ namespace BASIC
 			std::shared_ptr<node> build_operator(void);
 			std::shared_ptr<node> build_operand(void);
 
+			std::shared_ptr<node> parse_input(void);
 			std::shared_ptr<node> parse_print(void);
 			std::shared_ptr<node> parse_let(void);
 
+			void evaluate_input(std::shared_ptr<node> root);
 			bool evaluate_print(std::shared_ptr<node> root);
 
 		friend std::ostream &operator<<(std::ostream &stream, const std::shared_ptr<parse_tree::node> root);
