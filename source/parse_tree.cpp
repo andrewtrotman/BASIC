@@ -323,7 +323,6 @@ namespace BASIC
 	void parse_tree::evaluate_input(std::shared_ptr<parse_tree::node> root)
 		{
 		char input[1024];
-		memset(input, 'X', sizeof(input));
 
 		std::cout << root->left->string;
 		root = root->right;
