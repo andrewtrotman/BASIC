@@ -202,9 +202,12 @@ namespace BASIC
 
 		auto token = reserved_word::translate(parser.peek_next_token());
 		if (*token == '\0')
-			return command;
+			throw error::syntax();
 		else if (*token == '"')
+			{
 			command->left->string = parser.get_next_token();
+			command->left->string = command->left->string.substr(1, command->left->string.size() - 2);
+			}
 		else
 			command->left->string = "?";
 
@@ -316,24 +319,81 @@ namespace BASIC
 	/*
 		PARSE_TREE::EVALUATE_INPUT()
 		----------------------------
-		return true on print cr/lf
 	*/
 	void parse_tree::evaluate_input(std::shared_ptr<parse_tree::node> root)
 		{
 		char input[1024];
+		memset(input, 'X', sizeof(input));
 
 		std::cout << root->left->string;
-		fgets(input, sizeof(input), stdin);
+		root = root->right;
 
-		for (char *token = strtok(input, ",\n\r"); token != nullptr; token = strtok(NULL, ",\n\r"))
+		while (1)
 			{
-			root = root->right;
+			fgets(input, sizeof(input), stdin);
+
+			char *ch = input;
+			do
+				{
+				if (root == nullptr)
+					throw error::extra_ignored();
+
+				/*
+					remove whitespace before the data
+				*/
+				while (isspace(*ch))
+					ch++;
+				char *start = ch;
+
+				/*
+					extract the data
+				*/
+				if (isdigit(*ch))
+					while (isdigit(*ch))
+						ch++;
+				else if (*ch == '"')
+					{
+					ch++;
+					while (*ch != '"' && *ch != '\0')
+						ch++;
+					if (*ch == '"')
+						ch++;
+					}
+				else
+					while (*ch != ',' && *ch != '\0')
+						ch++;
+
+				/*
+					remove whitespace after the data
+				*/
+				while (isspace(*ch))
+					*ch++ = '\0';
+
+				if (*ch != ',' && *ch != '\0')
+					throw error::reenter();
+
+				if (*ch != '\0')
+					*ch++ = '\0';
+
+				if (isdigit(*start))
+					symbol_table[root->symbol] = atof(start);
+				else if (*start == '"')
+					symbol_table[root->symbol] = std::string(start + 1, strlen(start + 1) - 1);
+				else
+					symbol_table[root->symbol] = std::string(start);
+					
+				/*
+					next variable.
+				*/
+				root = root->right;
+				}
+			while (*ch != '\0');
+
 			if (root == nullptr)
-				throw error::runtime();
-			symbol_table[root->symbol] = std::string(token);
+				return;
+
+			std::cout << "??";
 			}
-		if (root != nullptr)
-			throw error::extra_ignored();
 		}
 
 	/*
@@ -353,7 +413,16 @@ namespace BASIC
 					std::cout << "\n";
 				}
 			else if (root->operation == reserved_word::INPUT)
-				evaluate_input(root);
+				while (1)
+					try
+						{
+						evaluate_input(root);
+						break;
+						}
+					catch (error::reenter)
+						{
+						/* Nothing */
+						}
 			else if (root->operation == reserved_word::EQUALS)
 				{
 				auto value = evaluate(root->right);

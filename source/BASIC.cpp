@@ -57,15 +57,24 @@ int main(int argc, char *argv[])
 
 //			program[10] = parser.build("input");
 //			program[20] = parser.build("input \"->\"");
-			program[30] = parser.build("input \"->\"; a");
+			program[30] = parser.build("input \"->\"; a,b, c");
 			program[40] = parser.build("? a");
+			program[50] = parser.build("? b");
+			program[60] = parser.build("? c");
 
 
 
 		for (const auto &[line, command] : program)
 			{
-//			std::cout << command << "\n";
-			parser.evaluate(command);
+			try
+				{
+	//			std::cout << command << "\n";
+				parser.evaluate(command);
+				}
+			catch (BASIC::error::extra_ignored)
+				{
+				std::cout << "EXTRA IGNORED";
+				}
 			}
 		}
 	catch (BASIC::error::syntax)
