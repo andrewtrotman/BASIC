@@ -20,13 +20,18 @@ namespace BASIC
 			
 		protected:
 			symbol_table symbol_table;
-			
-		protected:
-			void evaluate_if(std::shared_ptr<parse_tree::node> root);
-			void evaluate_input(std::shared_ptr<parse_tree::node> root);
-			bool evaluate_print(std::shared_ptr<parse_tree::node> root);
+			const program *parsed_code;
+			program::const_iterator next_line;
 
-			symbol evaluate(std::shared_ptr<parse_tree::node> root);
+		protected:
+			void evaluate_goto(const std::shared_ptr<parse_tree::node> &root);
+			void evaluate_if(const std::shared_ptr<parse_tree::node> &root);
+			void evaluate_input(const std::shared_ptr<parse_tree::node> &root);
+			bool evaluate_print(const std::shared_ptr<parse_tree::node> &root);
+
+			void evaluate_command(const std::shared_ptr<parse_tree::node> &root);
+			symbol evaluate_expression(const std::shared_ptr<parse_tree::node> &root);
+			void evaluate(const std::shared_ptr<parse_tree::node> &root);
 
 		public:
 			executive()

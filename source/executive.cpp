@@ -17,7 +17,7 @@ namespace BASIC
 		---------------------------
 		return true on print cr/lf
 	*/
-	bool executive::evaluate_print(std::shared_ptr<parse_tree::node> root)
+	bool executive::evaluate_print(const std::shared_ptr<parse_tree::node> &root)
 		{
 		if (root->operation == reserved_word::COMMA)
 			std::cout << "\t";
@@ -31,7 +31,7 @@ namespace BASIC
 
 		if (root->left != nullptr)
 			{
-			auto value = evaluate(root->left);
+			auto value = evaluate_expression(root->left);
 
 			if (value.isstring())
 				std::cout << (std::string)value;
@@ -46,13 +46,25 @@ namespace BASIC
 		}
 
 	/*
+		EXECUTIVE::EVALUATE_GOTO()
+		--------------------------
+	*/
+	void executive::evaluate_goto(const std::shared_ptr<parse_tree::node> &root)
+		{
+		size_t next_line_number = static_cast<size_t>(root->left->number);
+		next_line = parsed_code->lower_bound(next_line_number);
+		if (next_line != parsed_code->end())
+			if (next_line->first != next_line_number)
+				throw error::undefined_statement();
+		}
+
+	/*
 		EXECUTIVE::EVALUATE_IF()
 		------------------------
 	*/
-	void executive::evaluate_if(std::shared_ptr<parse_tree::node> root)
+	void executive::evaluate_if(const std::shared_ptr<parse_tree::node> &root)
 		{
-		auto got = evaluate(root->left);
-		if (got)
+		if (evaluate_expression(root->left))
 			evaluate(root->right);
 		}
 
@@ -60,12 +72,12 @@ namespace BASIC
 		EXECUTIVE::EVALUATE_INPUT()
 		---------------------------
 	*/
-	void executive::evaluate_input(std::shared_ptr<parse_tree::node> root)
+	void executive::evaluate_input(const std::shared_ptr<parse_tree::node> &the_root)
 		{
 		char input[1024];
 
-		std::cout << root->left->string;
-		root = root->right;
+		std::cout << the_root->left->string;
+		std::shared_ptr<parse_tree::node> root = root->right;
 
 		while (1)
 			{
@@ -136,41 +148,43 @@ namespace BASIC
 		}
 
 	/*
-		EXECUTIVE::EVALUATE()
-		---------------------
+		EXECUTIVE::EVALUATE_COMMAND()
+		-----------------------------
 	*/
-	symbol executive::evaluate(std::shared_ptr<parse_tree::node> root)
+	void executive::evaluate_command(const std::shared_ptr<parse_tree::node> &root)
+		{
+		if (root->operation == reserved_word::PRINT)
+			{
+			if (evaluate_print(root))
+				std::cout << "\n";
+			}
+		else if (root->operation == reserved_word::INPUT)
+			while (1)
+				try
+					{
+					evaluate_input(root);
+					break;
+					}
+				catch (error::reenter)
+					{
+					/* Nothing */
+					}
+		else if (root->operation == reserved_word::IF)
+			evaluate_if(root);
+		else if (root->operation == reserved_word::GOTO)
+			evaluate_goto(root);
+		else if (root->operation == reserved_word::EQUALS)
+			symbol_table[root->left->symbol] = symbol(evaluate_expression(root->right));
+		}
+
+	/*
+		EXECUTIVE::EVALUATE_EXPRESSION()
+		--------------------------------
+	*/
+	symbol executive::evaluate_expression(const std::shared_ptr<parse_tree::node> &root)
 		{
 		if (root == nullptr)
 			return 0;
-
-		if (root->type == parse_tree::node::COMMAND)
-			{
-			if (root->operation == reserved_word::PRINT)
-				{
-				if (evaluate_print(root))
-					std::cout << "\n";
-				}
-			else if (root->operation == reserved_word::INPUT)
-				while (1)
-					try
-						{
-						evaluate_input(root);
-						break;
-						}
-					catch (error::reenter)
-						{
-						/* Nothing */
-						}
-			else if (root->operation == reserved_word::IF)
-				evaluate_if(root);
-			else if (root->operation == reserved_word::EQUALS)
-				{
-				auto value = evaluate(root->right);
-				symbol_table[root->left->symbol] = symbol(value);
-				}
-			return 0;
-			}
 		else if (root->type == parse_tree::node::STRING)
 			return root->string;
 		else if (root->type == parse_tree::node::NUMBER)
@@ -179,8 +193,8 @@ namespace BASIC
 			return symbol_table[root->symbol];
 		else if (root->type == parse_tree::node::OPERATOR)
 			{
-			auto left = evaluate(root->left);
-			auto right = evaluate(root->right);
+			auto left = evaluate_expression(root->left);
+			auto right = evaluate_expression(root->right);
 			if (root->operation == reserved_word::PLUS)
 				return left + right;
 			else if (root->operation == reserved_word::MINUS)
@@ -218,8 +232,23 @@ namespace BASIC
 		EXECUTIVE::EVALUATE()
 		---------------------
 	*/
+	void executive::evaluate(const std::shared_ptr<parse_tree::node> &root)
+		{
+		if (root == nullptr)
+			return;
+		else if (root->type == parse_tree::node::COMMAND)
+			evaluate_command(root);
+		else
+			evaluate_expression(root);
+		}
+
+	/*
+		EXECUTIVE::EVALUATE()
+		---------------------
+	*/
 	void executive::evaluate(const executive::program &parsed_code, size_t start_line)
 		{
+		this->parsed_code = &parsed_code;
 		auto current_line = parsed_code.lower_bound(start_line);
 
 		while (current_line != parsed_code.end())
@@ -227,8 +256,10 @@ namespace BASIC
 			try
 				{
 //				std::cout << current_line->second << "\n";
+				next_line = current_line;					// done like this so that GOTO works
+				next_line++;
 				evaluate(current_line->second);
-				current_line++;
+				current_line = next_line;
 				}
 			catch (BASIC::error::extra_ignored)
 				{

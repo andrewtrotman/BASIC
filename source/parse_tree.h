@@ -69,7 +69,6 @@ namespace BASIC
 
 		protected:
 			parser parser;
-			symbol_table symbol_table;
 			
 		protected:
 			std::shared_ptr<node> build(void);
@@ -78,6 +77,7 @@ namespace BASIC
 			std::shared_ptr<node> build_operator(void);
 			std::shared_ptr<node> build_operand(void);
 
+			std::shared_ptr<node> parse_goto(void);
 			std::shared_ptr<node> parse_if(void);
 			std::shared_ptr<node> parse_input(void);
 			std::shared_ptr<node> parse_print(void);

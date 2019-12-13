@@ -17,10 +17,13 @@ namespace BASIC
 	const char *reserved_word::LET = "let";
 	const char *reserved_word::EQUALS = "=";
 	const char *reserved_word::NOT_EQUALS = "<>";
+	const char *reserved_word::NOT_EQUALS_ALT = "><";
 	const char *reserved_word::LESS_THAN = "<";
 	const char *reserved_word::GREATER_THAN = ">";
 	const char *reserved_word::LESS_THAN_EQUALS = "<=";
+	const char *reserved_word::EQUALS_LESS_THAN = "=<";
 	const char *reserved_word::GREATER_THAN_EQUALS = ">=";
+	const char *reserved_word::EQUALS_GREATER_THAN = "=>";
 	const char *reserved_word::COMMA = ",";
 	const char *reserved_word::QUESTIONMARK = "?";
 	const char *reserved_word::SEMICOLON = ";";
@@ -50,10 +53,13 @@ namespace BASIC
 		{std::string(PRINT), PRINT},
 		{std::string(EQUALS), EQUALS},
 		{std::string(NOT_EQUALS), NOT_EQUALS},
+		{std::string(NOT_EQUALS_ALT), NOT_EQUALS},
 		{std::string(LESS_THAN), LESS_THAN},
 		{std::string(GREATER_THAN), GREATER_THAN},
 		{std::string(LESS_THAN_EQUALS), LESS_THAN_EQUALS},
+		{std::string(EQUALS_LESS_THAN), LESS_THAN_EQUALS},
 		{std::string(GREATER_THAN_EQUALS), GREATER_THAN_EQUALS},
+		{std::string(EQUALS_GREATER_THAN), GREATER_THAN_EQUALS},
 		{std::string(OPEN_BRACKET), OPEN_BRACKET},
 		{std::string(CLOSE_BRACKET), CLOSE_BRACKET},
 		{std::string(PLUS), PLUS},

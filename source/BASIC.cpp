@@ -22,7 +22,8 @@ int main(int argc, char *argv[])
 		program[40] = parser.build("? a");
 		program[50] = parser.build("? b");
 		program[60] = parser.build("? c");
-		program[100] = parser.build("if a = 1 then print \"true\"");
+		program[100] = parser.build("if a >= 1 then print \"true\"");
+		program[200] = parser.build("goto 100");
 
 		eval.evaluate(program);
 		}

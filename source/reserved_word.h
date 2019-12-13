@@ -30,10 +30,13 @@ namespace BASIC
 			static const char *QUESTIONMARK;
 			static const char *EQUALS;
 			static const char *NOT_EQUALS;
+			static const char *NOT_EQUALS_ALT;
 			static const char *LESS_THAN;
 			static const char *GREATER_THAN;
 			static const char *LESS_THAN_EQUALS;
+			static const char *EQUALS_LESS_THAN;
 			static const char *GREATER_THAN_EQUALS;
+			static const char *EQUALS_GREATER_THAN;
 			static const char *OPEN_BRACKET;
 			static const char *CLOSE_BRACKET;
 			static const char *PLUS;

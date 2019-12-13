@@ -49,6 +49,30 @@ namespace BASIC
 				if (where < end)
 					where++;		// include the close quote
 				}
+			else if (*where == '<')
+				{
+				where++;
+				if (*where == '=')
+					where++;
+				else if (*where == '>')
+					where++;
+				}
+			else if (*where == '>')
+				{
+				where++;
+				if (*where == '=')
+					where++;
+				else if (*where == '<')
+					where++;
+				}
+			else if (*where == '=')
+				{
+				where++;
+				if (*where == '<')
+					where++;
+				else if (*where == '>')
+					where++;
+				}
 			else
 				where++;
 

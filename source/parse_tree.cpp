@@ -235,6 +235,29 @@ namespace BASIC
 
 		return command;
 		}
+	/*
+		PARSE_TREE::PARSE_GOTO()
+		------------------------
+		GOTO linenum
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_goto(void)
+		{
+		std::shared_ptr<parse_tree::node> command(new node);
+
+		parser.get_next_token();
+		auto line_number = parser.get_next_token();
+		if (!isdigit(*line_number))
+			throw error::syntax();
+
+		command->type = node::COMMAND;
+		command->operation = reserved_word::GOTO;
+		std::shared_ptr<parse_tree::node> target_line(new node);
+		command->left = target_line;
+		target_line->type = node::NUMBER;
+		target_line->number = atof(line_number);
+
+		return command;
+		}
 
 	/*
 		PARSE_TREE::PARSE_IF()
@@ -257,8 +280,27 @@ namespace BASIC
 		if (token == reserved_word::THEN)
 			{
 			parser.get_next_token();			// THEN
-			command->right = build_command();
+			auto token = parser.peek_next_token();
+			if (isdigit(*token))
+				{
+				token = parser.get_next_token();
+
+				std::shared_ptr<parse_tree::node> target(new node);
+				command->left = target;
+				target->type = node::COMMAND;
+				target->operation = reserved_word::GOTO;
+				std::shared_ptr<parse_tree::node> target_line(new node);
+				target->left = target_line;
+				target_line->type = node::NUMBER;
+				target_line->number = atof(token);
+				}
+			else
+				command->right = build_command();
 			}
+		else if (token == reserved_word::GOTO)
+			command->right = parse_goto();
+		else
+			throw error::syntax();
 
 		return command;
 		}
@@ -306,6 +348,8 @@ namespace BASIC
 			return parse_input();
 		else if (command == reserved_word::IF)
 			return parse_if();
+		else if (command == reserved_word::GOTO)
+			return parse_goto();
 		else
 			return parse_let();
 		}
