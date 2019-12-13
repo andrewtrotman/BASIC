@@ -237,6 +237,33 @@ namespace BASIC
 		}
 
 	/*
+		PARSE_TREE::PARSE_IF()
+		----------------------
+		IF expr THEN instruction [{:instruction}]
+!		IF expr THEN [GOTO] linenum
+!		IF expr [THEN] GOTO linenum
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_if(void)
+		{
+		std::shared_ptr<parse_tree::node> command(new node);
+
+		parser.get_next_token();
+		command->type = node::COMMAND;
+		command->operation = reserved_word::IF;
+		command->left = build();
+
+		auto token = reserved_word::translate(parser.peek_next_token());
+
+		if (token == reserved_word::THEN)
+			{
+			parser.get_next_token();			// THEN
+			command->right = build_command();
+			}
+
+		return command;
+		}
+
+	/*
 		PARSE_TREE::PARSE_LET()
 		-----------------------
 	*/
@@ -265,6 +292,27 @@ namespace BASIC
 		}
 
 	/*
+		PARSE_TREE::BUILD_COMMAND()
+		---------------------------
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::build_command(void)
+		{
+		auto command = reserved_word::translate(parser.peek_next_token());
+		if (command == reserved_word::PRINT)
+			return parse_print();
+		else if (command == reserved_word::QUESTIONMARK)
+			return parse_print();
+		else if (command == reserved_word::INPUT)
+			return parse_input();
+		else if (command == reserved_word::IF)
+			return parse_if();
+		else
+			return parse_let();
+		}
+
+
+
+	/*
 		PARSE_TREE::BUILD()
 		-------------------
 	*/
@@ -279,9 +327,14 @@ namespace BASIC
 			return parse_print();
 		else if (command == reserved_word::INPUT)
 			return parse_input();
+		else if (command == reserved_word::IF)
+			return parse_if();
 		else
 			return parse_let();
 		}
+
+
+
 
 	/*
 		PARSE_TREE::EVALUATE_PRINT()
@@ -314,6 +367,17 @@ namespace BASIC
 			return evaluate_print(root->right);
 
 		return true;
+		}
+
+	/*
+		PARSE_TREE::EVALUATE_IF()
+		-------------------------
+	*/
+	void parse_tree::evaluate_if(std::shared_ptr<parse_tree::node> root)
+		{
+		auto got = evaluate(root->left);
+		if (got)
+			evaluate(root->right);
 		}
 
 	/*
@@ -422,6 +486,8 @@ namespace BASIC
 						{
 						/* Nothing */
 						}
+			else if (root->operation == reserved_word::IF)
+				evaluate_if(root);
 			else if (root->operation == reserved_word::EQUALS)
 				{
 				auto value = evaluate(root->right);
@@ -453,6 +519,18 @@ namespace BASIC
 				return right;
 			else if (root->operation == reserved_word::UNARY_MINUS)
 				return -(double)right;
+			else if (root->operation == reserved_word::EQUALS)
+				return left == right;
+			else if (root->operation == reserved_word::NOT_EQUALS)
+				return left != right;
+			else if (root->operation == reserved_word::GREATER_THAN)
+				return left > right;
+			else if (root->operation == reserved_word::LESS_THAN)
+				return left < right;
+			else if (root->operation == reserved_word::GREATER_THAN_EQUALS)
+				return left >= right;
+			else if (root->operation == reserved_word::LESS_THAN_EQUALS)
+				return left <= right;
 			else
 				throw error::runtime();
 			}

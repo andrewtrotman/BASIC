@@ -73,14 +73,17 @@ namespace BASIC
 			
 		protected:
 			std::shared_ptr<node> build(void);
+			std::shared_ptr<node> build_command(void);
 			std::shared_ptr<node> build_tree(std::shared_ptr<node> left = nullptr);
 			std::shared_ptr<node> build_operator(void);
 			std::shared_ptr<node> build_operand(void);
 
+			std::shared_ptr<node> parse_if(void);
 			std::shared_ptr<node> parse_input(void);
 			std::shared_ptr<node> parse_print(void);
 			std::shared_ptr<node> parse_let(void);
 
+			void evaluate_if(std::shared_ptr<node> root);
 			void evaluate_input(std::shared_ptr<node> root);
 			bool evaluate_print(std::shared_ptr<node> root);
 
@@ -120,6 +123,8 @@ namespace BASIC
 			{
 			if (root->operation == reserved_word::PRINT)
 				stream << "PRINT ";
+			if (root->operation == reserved_word::IF)
+				stream << "IF ";
 			if (root->operation == reserved_word::EQUALS)
 				stream << " = ";
 			}

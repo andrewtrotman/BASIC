@@ -49,9 +49,9 @@ namespace BASIC
 				SYMBOL::SYMBOL()
 				----------------
 			*/
-			symbol(double value) :
-				type(NUMERIC),
-				value(value)
+			symbol(const std::string &value) :
+				type(STRING),
+				string(value)
 				{
 				/* Nothing */
 				}
@@ -60,9 +60,10 @@ namespace BASIC
 				SYMBOL::SYMBOL()
 				----------------
 			*/
-			symbol(const std::string &value) :
-				type(STRING),
-				string(value)
+			template <typename TYPE>
+			symbol(TYPE value) :
+				type(NUMERIC),
+				value(static_cast<double>(value))
 				{
 				/* Nothing */
 				}
@@ -125,7 +126,7 @@ namespace BASIC
 				if (type == NUMERIC && additive.type == NUMERIC)
 					return symbol(value + additive.value);
 				else
-					throw error::runtime();
+					throw error::type_mismatch();
 				}
 
 			/*
@@ -137,7 +138,7 @@ namespace BASIC
 				if (type == NUMERIC && additive.type == NUMERIC)
 					return symbol(value * additive.value);
 				else
-					throw error::runtime();
+					throw error::type_mismatch();
 				}
 
 			/*
@@ -147,11 +148,95 @@ namespace BASIC
 			symbol operator/(const symbol &additive)
 				{
 				if (type != NUMERIC || additive.type != NUMERIC)
-					throw error::runtime();
+					throw error::type_mismatch();
 				if (additive.value == 0)
 					throw error::division_by_zero();
 
 				return symbol(value / additive.value);
+				}
+
+			/*
+				SYMBOL::OPERATOR==()
+				--------------------
+			*/
+			symbol operator==(const symbol &right)
+				{
+				if (type != right.type)
+					throw error::type_mismatch();
+				if (type == NUMERIC)
+					return value == right.value;
+				else
+					return string == right.string;
+				}
+
+			/*
+				SYMBOL::OPERATOR!=()
+				--------------------
+			*/
+			symbol operator!=(const symbol &right)
+				{
+				if (type != right.type)
+					throw error::type_mismatch();
+				if (type == NUMERIC)
+					return value != right.value;
+				else
+					return string != right.string;
+				}
+
+			/*
+				SYMBOL::OPERATOR>()
+				--------------------
+			*/
+			symbol operator>(const symbol &right)
+				{
+				if (type != right.type)
+					throw error::type_mismatch();
+				if (type == NUMERIC)
+					return value > right.value;
+				else
+					return string > right.string;
+				}
+
+			/*
+				SYMBOL::OPERATOR<()
+				--------------------
+			*/
+			symbol operator<(const symbol &right)
+				{
+				if (type != right.type)
+					throw error::type_mismatch();
+				if (type == NUMERIC)
+					return value < right.value;
+				else
+					return string < right.string;
+				}
+
+			/*
+				SYMBOL::OPERATOR>=()
+				--------------------
+			*/
+			symbol operator>=(const symbol &right)
+				{
+				if (type != right.type)
+					throw error::type_mismatch();
+				if (type == NUMERIC)
+					return value >= right.value;
+				else
+					return string >= right.string;
+				}
+
+			/*
+				SYMBOL::OPERATOR<=()
+				--------------------
+			*/
+			symbol operator<=(const symbol &right)
+				{
+				if (type != right.type)
+					throw error::type_mismatch();
+				if (type == NUMERIC)
+					return value <= right.value;
+				else
+					return string <= right.string;
 				}
 		};
 	}

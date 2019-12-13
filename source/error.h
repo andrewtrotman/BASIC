@@ -18,5 +18,6 @@ namespace BASIC
 			class runtime 				{ /* Nothing */ };
 			class extra_ignored 		{ /* Nothing */ };
 			class reenter 				{ /* Nothing */ };
+			class type_mismatch 		{ /* Nothing */ };
 		};
 	}

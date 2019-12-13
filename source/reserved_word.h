@@ -19,6 +19,9 @@ namespace BASIC
 			/*
 				List of known reserved words
 			*/
+			static const char *IF;
+			static const char *THEN;
+			static const char *GOTO;
 			static const char *INPUT;
 			static const char *PRINT;
 			static const char *LET;
@@ -26,6 +29,11 @@ namespace BASIC
 			static const char *SEMICOLON;
 			static const char *QUESTIONMARK;
 			static const char *EQUALS;
+			static const char *NOT_EQUALS;
+			static const char *LESS_THAN;
+			static const char *GREATER_THAN;
+			static const char *LESS_THAN_EQUALS;
+			static const char *GREATER_THAN_EQUALS;
 			static const char *OPEN_BRACKET;
 			static const char *CLOSE_BRACKET;
 			static const char *PLUS;

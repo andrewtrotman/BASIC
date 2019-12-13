@@ -57,10 +57,15 @@ int main(int argc, char *argv[])
 
 //			program[10] = parser.build("input");
 //			program[20] = parser.build("input \"->\"");
-			program[30] = parser.build("input \"->\"; a,b, c");
+//			program[30] = parser.build("input \"->\"; a,b, c");
+			program[20] = parser.build("a = 1");
+			program[30] = parser.build("b = a = 1");
 			program[40] = parser.build("? a");
 			program[50] = parser.build("? b");
 			program[60] = parser.build("? c");
+
+			program[100] = parser.build("if a = 1 then print \"true\"");
+
 
 
 
@@ -68,7 +73,7 @@ int main(int argc, char *argv[])
 			{
 			try
 				{
-	//			std::cout << command << "\n";
+//				std::cout << command << "\n";
 				parser.evaluate(command);
 				}
 			catch (BASIC::error::extra_ignored)
