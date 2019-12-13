@@ -22,7 +22,10 @@ int main(int argc, char *argv[])
 		program[40] = parser.build("? a");
 		program[50] = parser.build("? b");
 		program[60] = parser.build("? c");
-		program[100] = parser.build("if a >= 1 then print \"true\"");
+		program[70] = parser.build("if a >= 1 then goto 90");
+		program[80] = parser.build("goto 100");
+		program[90] = parser.build("print \"true\"");
+		program[100] = parser.build("end");
 		eval.evaluate(program);
 		}
 	catch (BASIC::error::syntax)
@@ -40,6 +43,10 @@ int main(int argc, char *argv[])
 	catch (BASIC::error::extra_ignored)
 		{
 		std::cout << "EXTRA IGNORED\n\n";
+		}
+	catch (BASIC::error::undefined_statement)
+		{
+		std::cout << "UNDEFINED STATEMENT\n\n";
 		}
 	catch (...)
 		{

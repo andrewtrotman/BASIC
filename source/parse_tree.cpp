@@ -239,6 +239,7 @@ namespace BASIC
 
 		return command;
 		}
+
 	/*
 		PARSE_TREE::PARSE_GOTO()
 		------------------------
@@ -260,6 +261,21 @@ namespace BASIC
 		target_line->type = node::NUMBER;
 		target_line->number = atof(line_number);
 
+		return command;
+		}
+
+	/*
+		PARSE_TREE::PARSE_END()
+		-----------------------
+		END
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_end(void)
+		{
+		std::shared_ptr<parse_tree::node> command(new node);
+
+		parser.get_next_token();
+		command->type = node::COMMAND;
+		command->operation = reserved_word::END;
 		return command;
 		}
 
@@ -354,6 +370,8 @@ namespace BASIC
 			return parse_if();
 		else if (command == reserved_word::GOTO)
 			return parse_goto();
+		else if (command == reserved_word::END)
+			return parse_end();
 		else
 			return parse_let();
 		}

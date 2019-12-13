@@ -59,6 +59,15 @@ namespace BASIC
 		}
 
 	/*
+		EXECUTIVE::EVALUATE_END()
+		-------------------------
+	*/
+	void executive::evaluate_end(const std::shared_ptr<parse_tree::node> &root)
+		{
+		end = true;
+		}
+
+	/*
 		EXECUTIVE::EVALUATE_IF()
 		------------------------
 	*/
@@ -173,6 +182,8 @@ namespace BASIC
 			evaluate_if(root);
 		else if (root->operation == reserved_word::GOTO)
 			evaluate_goto(root);
+		else if (root->operation == reserved_word::END)
+			evaluate_end(root);
 		else if (root->operation == reserved_word::EQUALS)
 			symbol_table[root->left->symbol] = symbol(evaluate_expression(root->right));
 		}
@@ -255,11 +266,16 @@ namespace BASIC
 			{
 			try
 				{
+				end = false;
 //				std::cout << current_line->second << "\n";
 				next_line = current_line;					// done like this so that GOTO works
 				next_line++;
 				evaluate(current_line->second);
 				current_line = next_line;
+				if (current_line == parsed_code.end())
+					break;
+				if (end)
+					break;
 				}
 			catch (BASIC::error::extra_ignored)
 				{

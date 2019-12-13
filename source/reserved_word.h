@@ -19,6 +19,7 @@ namespace BASIC
 			/*
 				List of known reserved words
 			*/
+			static const char *END;
 			static const char *IF;
 			static const char *THEN;
 			static const char *GOTO;

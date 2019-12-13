@@ -12,6 +12,7 @@ namespace BASIC
 	const char *reserved_word::THEN = "then";
 	const char *reserved_word::GOTO = "goto";
 	const char *reserved_word::IF = "if";
+	const char *reserved_word::END = "end";
 	const char *reserved_word::INPUT = "input";
 	const char *reserved_word::PRINT = "print";
 	const char *reserved_word::LET = "let";
@@ -46,6 +47,7 @@ namespace BASIC
 		{std::string(SEMICOLON), SEMICOLON},
 		{std::string(QUESTIONMARK), QUESTIONMARK},
 		{std::string(LET), LET},
+		{std::string(END), END},
 		{std::string(IF), IF},
 		{std::string(THEN), THEN},
 		{std::string(GOTO), GOTO},

@@ -22,8 +22,10 @@ namespace BASIC
 			symbol_table symbol_table;
 			const program *parsed_code;
 			program::const_iterator next_line;
+			bool end;
 
 		protected:
+			void evaluate_end(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_goto(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_if(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_input(const std::shared_ptr<parse_tree::node> &root);
