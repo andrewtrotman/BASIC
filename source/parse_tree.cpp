@@ -152,6 +152,9 @@ namespace BASIC
 	/*
 		PARSE_TREE::PARSE_PRINT()
 		-------------------------
+		PRINT [{expr} [{,|; [{expr}]}]] [,|;]
+		PRINT {;}
+		PRINT {,}
 	*/
 	std::shared_ptr<parse_tree::node> parse_tree::parse_print(void)
 		{
@@ -190,6 +193,7 @@ namespace BASIC
 	/*
 		PARSE_TREE::PARSE_INPUT()
 		-------------------------
+		INPUT [string;] var [{,var}]
 	*/
 	std::shared_ptr<parse_tree::node> parse_tree::parse_input(void)
 		{
@@ -263,8 +267,8 @@ namespace BASIC
 		PARSE_TREE::PARSE_IF()
 		----------------------
 		IF expr THEN instruction [{:instruction}]
-!		IF expr THEN [GOTO] linenum
-!		IF expr [THEN] GOTO linenum
+		IF expr THEN [GOTO] linenum
+		IF expr [THEN] GOTO linenum
 	*/
 	std::shared_ptr<parse_tree::node> parse_tree::parse_if(void)
 		{
@@ -286,7 +290,7 @@ namespace BASIC
 				token = parser.get_next_token();
 
 				std::shared_ptr<parse_tree::node> target(new node);
-				command->left = target;
+				command->right = target;
 				target->type = node::COMMAND;
 				target->operation = reserved_word::GOTO;
 				std::shared_ptr<parse_tree::node> target_line(new node);
