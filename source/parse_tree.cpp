@@ -319,18 +319,7 @@ namespace BASIC
 	std::shared_ptr<parse_tree::node> parse_tree::build(const std::string &string)
 		{
 		parser.set_document(string);
-
-		auto command = reserved_word::translate(parser.peek_next_token());
-		if (command == reserved_word::PRINT)
-			return parse_print();
-		else if (command == reserved_word::QUESTIONMARK)
-			return parse_print();
-		else if (command == reserved_word::INPUT)
-			return parse_input();
-		else if (command == reserved_word::IF)
-			return parse_if();
-		else
-			return parse_let();
+		return build_command();
 		}
 
 
