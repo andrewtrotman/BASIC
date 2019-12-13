@@ -83,10 +83,6 @@ namespace BASIC
 			std::shared_ptr<node> parse_print(void);
 			std::shared_ptr<node> parse_let(void);
 
-			void evaluate_if(std::shared_ptr<node> root);
-			void evaluate_input(std::shared_ptr<node> root);
-			bool evaluate_print(std::shared_ptr<node> root);
-
 		friend std::ostream &operator<<(std::ostream &stream, const std::shared_ptr<parse_tree::node> root);
 
 		public:
@@ -96,7 +92,6 @@ namespace BASIC
 				}
 
 			std::shared_ptr<node> build(const std::string &string);
-			symbol evaluate(std::shared_ptr<parse_tree::node> root);
 		};
 
 	/*

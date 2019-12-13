@@ -5,6 +5,8 @@
 
 set(BASIClib_FILES
 	error.h
+	executive.h
+	executive.cpp
 	parser.h
 	parser.cpp
 	parse_tree.h
