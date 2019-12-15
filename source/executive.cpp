@@ -78,6 +78,91 @@ namespace BASIC
 		}
 
 	/*
+		EXECUTIVE::EVALUATE_FOR()
+		-------------------------
+	*/
+	void executive::evaluate_for(const std::shared_ptr<parse_tree::node> &root)
+		{
+		evaluate(root->left);
+		symbol &from = symbol_table[root->left->left->symbol];
+		symbol to = evaluate_expression(root->right->left);
+		symbol step = evaluate_expression(root->right->right);
+		for_stack.push_back(for_tuple(root->left->left->symbol, from, to, step, next_line));
+		}
+
+
+	/*
+		EXECUTIVE::STEP()
+		-----------------
+		Returns true if a loop was iterated, or false if we leave a loop.
+	*/
+	bool executive::step(int64_t which_for_loop)
+		{
+		for_tuple &who = for_stack[which_for_loop];
+
+		who.variable = static_cast<double>(who.variable) + who.step;
+		double step = static_cast<double>(who.step);
+		if (step > 0)
+			{
+			if (static_cast<double>(who.variable) <= who.to)
+				next_line = who.line;
+			else
+				return false;
+			}
+		else if (step < 0)
+			{
+			if (static_cast<double>(who.variable) >= who.to)
+				next_line = who.line;
+			else
+				return false;
+			}
+		else
+			next_line = who.line;
+
+		return true;
+		}
+
+	/*
+		EXECUTIVE::EVALUATE_NEXT()
+		--------------------------
+	*/
+	void executive::evaluate_next(const std::shared_ptr<parse_tree::node> &root)
+		{
+		int64_t which_for_loop = for_stack.size() - 1;
+		if (which_for_loop < 0)
+			throw error::next_without_for();
+
+		if (root->string == "")
+			{
+			if (!step(which_for_loop))
+				for_stack.pop_back();
+			}
+		else
+			{
+			const char *list = root->string.c_str();
+			do
+				{
+				const char *from = list;
+				const char *to = strchr(from, ',');
+				if (to == nullptr)
+					to = from + strlen(from);
+
+				while (for_stack[which_for_loop].variable_name != std::string(from, to - from))
+					if (--which_for_loop < 0)
+						throw error::next_without_for();
+
+				if (step(which_for_loop))
+					return;
+				else
+					for_stack.pop_back();
+
+				list = to + 1;		// skip over the ",".
+				}
+			while (*list != '\0');
+			}
+		}
+
+	/*
 		EXECUTIVE::EVALUATE_INPUT()
 		---------------------------
 	*/
@@ -180,6 +265,10 @@ namespace BASIC
 					}
 		else if (root->operation == reserved_word::IF)
 			evaluate_if(root);
+		else if (root->operation == reserved_word::FOR)
+			evaluate_for(root);
+		else if (root->operation == reserved_word::NEXT)
+			evaluate_next(root);
 		else if (root->operation == reserved_word::GOTO)
 			evaluate_goto(root);
 		else if (root->operation == reserved_word::END)

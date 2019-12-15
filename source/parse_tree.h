@@ -77,6 +77,8 @@ namespace BASIC
 			std::shared_ptr<node> build_operator(void);
 			std::shared_ptr<node> build_operand(void);
 
+			std::shared_ptr<node> parse_next(void);
+			std::shared_ptr<node> parse_for(void);
 			std::shared_ptr<node> parse_end(void);
 			std::shared_ptr<node> parse_goto(void);
 			std::shared_ptr<node> parse_if(void);

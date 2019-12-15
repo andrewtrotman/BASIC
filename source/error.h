@@ -20,5 +20,6 @@ namespace BASIC
 			class reenter 					{ /* Nothing */ };
 			class type_mismatch 			{ /* Nothing */ };
 			class undefined_statement 	{ /* Nothing */ };
+			class next_without_for	 	{ /* Nothing */ };
 		};
 	}

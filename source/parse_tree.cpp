@@ -241,6 +241,80 @@ namespace BASIC
 		}
 
 	/*
+		PARSE_TREE::PARSE_FOR()
+		-----------------------
+		FOR real avar = aexpr1 TO aexpr2 [STEP expr3]
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_for(void)
+		{
+		std::shared_ptr<parse_tree::node> command(new node);
+
+		parser.get_next_token();			// FOR
+		command->type = node::COMMAND;
+		command->operation = reserved_word::FOR;
+		command->left = parse_let();
+		auto token = reserved_word::translate(parser.peek_next_token());
+		if (token == reserved_word::TO)
+			{
+			parser.get_next_token();
+			std::shared_ptr<parse_tree::node> to_step(new node);
+			command->right = to_step;
+			to_step->left = build();		// the to amount
+			token = reserved_word::translate(parser.peek_next_token());
+			if (token ==  reserved_word::STEP)
+				{
+				parser.get_next_token();
+				to_step->right = build();
+				}
+			else
+				{
+				to_step->right = std::make_shared<node>();
+				to_step->right->type = node::NUMBER;
+				to_step->right->number = 1;
+				}
+			}
+		else
+			throw error::syntax();
+
+		return command;
+		}
+
+	/*
+		PARSE_TREE::PARSE_NEXT()
+		-----------------------
+		NEXT [avar]
+		NEXT avar [{,avar}]
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_next(void)
+		{
+		std::shared_ptr<parse_tree::node> command(new node);
+
+		parser.get_next_token();			// FOR
+
+		command->type = node::COMMAND;
+		command->operation = reserved_word::NEXT;
+
+		auto token = parser.peek_next_token();
+		while (isalpha(*token))
+			{
+			/*
+				we have a named variable
+			*/
+			command->string += token;
+			parser.get_next_token();
+			token = reserved_word::translate(parser.peek_next_token());
+			if (token == reserved_word::COMMA)
+				{
+				parser.get_next_token();
+				command->string += ",";
+				}
+			token = parser.peek_next_token();
+			}
+
+		return command;
+		}
+
+	/*
 		PARSE_TREE::PARSE_GOTO()
 		------------------------
 		GOTO linenum
@@ -347,8 +421,6 @@ namespace BASIC
 		let->left->symbol = variable;
 
 		let->right = build();
-		if (*parser.peek_next_token() != '\0')
-			throw error::syntax();
 
 		return let;
 		}
@@ -372,6 +444,10 @@ namespace BASIC
 			return parse_goto();
 		else if (command == reserved_word::END)
 			return parse_end();
+		else if (command == reserved_word::FOR)
+			return parse_for();
+		else if (command == reserved_word::NEXT)
+			return parse_next();
 		else
 			return parse_let();
 		}

@@ -17,15 +17,10 @@ int main(int argc, char *argv[])
 	try
 		{
 		std::string line;
-		program[20] = parser.build("a = 1");
-		program[30] = parser.build("b = a = 1");
-		program[40] = parser.build("? a");
-		program[50] = parser.build("? b");
-		program[60] = parser.build("? c");
-		program[70] = parser.build("if a >= 1 then goto 90");
-		program[80] = parser.build("goto 100");
-		program[90] = parser.build("print \"true\"");
-		program[100] = parser.build("end");
+		program[10] = parser.build("for a = 1 to 3");
+		program[20] = parser.build("for b = 1 to 3");
+		program[30] = parser.build("? a,b");
+		program[50] = parser.build("next b,a");
 		eval.evaluate(program);
 		}
 	catch (BASIC::error::syntax)
@@ -47,6 +42,10 @@ int main(int argc, char *argv[])
 	catch (BASIC::error::undefined_statement)
 		{
 		std::cout << "UNDEFINED STATEMENT\n\n";
+		}
+	catch (BASIC::error::next_without_for)
+		{
+		std::cout << "NEXT WITHOUT FOR\n\n";
 		}
 	catch (...)
 		{

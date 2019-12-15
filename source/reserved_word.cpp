@@ -9,6 +9,10 @@ namespace BASIC
 	/*
 		Reserved words
 	*/
+	const char *reserved_word::FOR = "for";
+	const char *reserved_word::TO = "to";
+	const char *reserved_word::STEP = "step";
+	const char *reserved_word::NEXT = "next";
 	const char *reserved_word::THEN = "then";
 	const char *reserved_word::GOTO = "goto";
 	const char *reserved_word::IF = "if";
@@ -48,6 +52,10 @@ namespace BASIC
 		{std::string(QUESTIONMARK), QUESTIONMARK},
 		{std::string(LET), LET},
 		{std::string(END), END},
+		{std::string(FOR), FOR},
+		{std::string(TO), TO},
+		{std::string(STEP), STEP},
+		{std::string(NEXT), NEXT},
 		{std::string(IF), IF},
 		{std::string(THEN), THEN},
 		{std::string(GOTO), GOTO},
