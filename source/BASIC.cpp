@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 		program[30] = parser.build("end");
 		program[40] = parser.build("? 40");
 		program[100] = parser.build("?100");
-		program[105] = parser.build("pop");
+		program[105] = parser.build("rem pop");
 		program[110] = parser.build("return");
 		eval.evaluate(program);
 		}
