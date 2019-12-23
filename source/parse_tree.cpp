@@ -393,6 +393,17 @@ namespace BASIC
 		}
 
 	/*
+		PARSE_TREE::PARSE_REM()
+		-----------------------
+		REM {character|"}
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_rem(void)
+		{
+		return parse_parameterless_statement(reserved_word::REM);
+		}
+
+
+	/*
 		PARSE_TREE::PARSE_PARAMETERLESS_STATEMENT()
 		-------------------------------------------
 		construct a node for a command that has no parameters (RETURN, END, etc.)
@@ -508,6 +519,8 @@ namespace BASIC
 			return parse_for();
 		else if (command == reserved_word::NEXT)
 			return parse_next();
+		else if (command == reserved_word::REM)
+			return parse_rem();
 		else
 			return parse_let();
 		}

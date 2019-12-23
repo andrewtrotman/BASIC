@@ -58,6 +58,7 @@ namespace BASIC
 			void evaluate_goto(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_gosub(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_return(const std::shared_ptr<parse_tree::node> &root);
+			void evaluate_rem(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_pop(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_if(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_input(const std::shared_ptr<parse_tree::node> &root);

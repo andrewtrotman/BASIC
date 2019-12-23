@@ -84,6 +84,7 @@ namespace BASIC
 			std::shared_ptr<node> parse_gosub(void);
 			std::shared_ptr<node> parse_return(void);
 			std::shared_ptr<node> parse_pop(void);
+			std::shared_ptr<node> parse_rem(void);
 			std::shared_ptr<node> parse_if(void);
 			std::shared_ptr<node> parse_input(void);
 			std::shared_ptr<node> parse_print(void);

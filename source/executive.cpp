@@ -102,6 +102,17 @@ namespace BASIC
 		}
 
 	/*
+		EXECUTIVE::EVALUATE_REM()
+		-------------------------
+	*/
+	void executive::evaluate_rem(const std::shared_ptr<parse_tree::node> &root)
+		{
+		/*
+			Nothing
+		*/
+		}
+
+	/*
 		EXECUTIVE::EVALUATE_END()
 		-------------------------
 	*/
@@ -324,6 +335,8 @@ namespace BASIC
 			evaluate_end(root);
 		else if (root->operation == reserved_word::EQUALS)
 			symbol_table[root->left->symbol] = symbol(evaluate_expression(root->right));
+		else if (root->operation == reserved_word::REM)
+			evaluate_rem(root);
 		}
 
 	/*
