@@ -15,6 +15,9 @@ namespace BASIC
 	const char *reserved_word::NEXT = "next";
 	const char *reserved_word::THEN = "then";
 	const char *reserved_word::GOTO = "goto";
+	const char *reserved_word::GOSUB = "gosub";
+	const char *reserved_word::RETURN = "return";
+	const char *reserved_word::POP = "pop";
 	const char *reserved_word::IF = "if";
 	const char *reserved_word::END = "end";
 	const char *reserved_word::INPUT = "input";
@@ -59,6 +62,9 @@ namespace BASIC
 		{std::string(IF), IF},
 		{std::string(THEN), THEN},
 		{std::string(GOTO), GOTO},
+		{std::string(GOSUB), GOSUB},
+		{std::string(RETURN), RETURN},
+		{std::string(POP), POP},
 		{std::string(INPUT), INPUT},
 		{std::string(PRINT), PRINT},
 		{std::string(EQUALS), EQUALS},

@@ -17,10 +17,13 @@ int main(int argc, char *argv[])
 	try
 		{
 		std::string line;
-		program[10] = parser.build("for a = 1 to 3");
-		program[20] = parser.build("for b = 1 to 3");
-		program[30] = parser.build("? a,b");
-		program[50] = parser.build("next b,a");
+		program[10] = parser.build("gosub 100");
+		program[20] = parser.build("? 20");
+		program[30] = parser.build("end");
+		program[40] = parser.build("? 40");
+		program[100] = parser.build("?100");
+		program[105] = parser.build("pop");
+		program[110] = parser.build("return");
 		eval.evaluate(program);
 		}
 	catch (BASIC::error::syntax)
@@ -46,6 +49,10 @@ int main(int argc, char *argv[])
 	catch (BASIC::error::next_without_for)
 		{
 		std::cout << "NEXT WITHOUT FOR\n\n";
+		}
+	catch (BASIC::error::return_without_gosub)
+		{
+		std::cout << "RETURN WITHOUT GOSUB\n\n";
 		}
 	catch (...)
 		{

@@ -339,17 +339,71 @@ namespace BASIC
 		}
 
 	/*
+		PARSE_TREE::PARSE_GOSUB()
+		-------------------------
+		GOSUB linenum
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_gosub(void)
+		{
+		std::shared_ptr<parse_tree::node> command(new node);
+
+		parser.get_next_token();
+		auto line_number = parser.get_next_token();
+		if (!isdigit(*line_number))
+			throw error::syntax();
+
+		command->type = node::COMMAND;
+		command->operation = reserved_word::GOSUB;
+		std::shared_ptr<parse_tree::node> target_line(new node);
+		command->left = target_line;
+		target_line->type = node::NUMBER;
+		target_line->number = atof(line_number);
+
+		return command;
+		}
+
+	/*
+		PARSE_TREE::PARSE_RETURN()
+		--------------------------
+		RETURN
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_return(void)
+		{
+		return parse_parameterless_statement(reserved_word::RETURN);
+		}
+
+	/*
+		PARSE_TREE::PARSE_POP()
+		-----------------------
+		RETURN
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_pop(void)
+		{
+		return parse_parameterless_statement(reserved_word::POP);
+		}
+
+	/*
 		PARSE_TREE::PARSE_END()
 		-----------------------
 		END
 	*/
 	std::shared_ptr<parse_tree::node> parse_tree::parse_end(void)
 		{
+		return parse_parameterless_statement(reserved_word::END);
+		}
+
+	/*
+		PARSE_TREE::PARSE_PARAMETERLESS_STATEMENT()
+		-------------------------------------------
+		construct a node for a command that has no parameters (RETURN, END, etc.)
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_parameterless_statement(const char *statement)
+		{
 		std::shared_ptr<parse_tree::node> command(new node);
 
 		parser.get_next_token();
 		command->type = node::COMMAND;
-		command->operation = reserved_word::END;
+		command->operation = statement;
 		return command;
 		}
 
@@ -442,6 +496,12 @@ namespace BASIC
 			return parse_if();
 		else if (command == reserved_word::GOTO)
 			return parse_goto();
+		else if (command == reserved_word::GOSUB)
+			return parse_gosub();
+		else if (command == reserved_word::RETURN)
+			return parse_return();
+		else if (command == reserved_word::POP)
+			return parse_pop();
 		else if (command == reserved_word::END)
 			return parse_end();
 		else if (command == reserved_word::FOR)

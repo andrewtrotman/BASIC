@@ -48,6 +48,7 @@ namespace BASIC
 			program::const_iterator next_line;
 			bool end;
 			std::vector<for_tuple> for_stack;
+			std::vector<program::const_iterator> gosub_stack;
 
 		protected:
 			bool step(int64_t which_for_loop);
@@ -55,6 +56,9 @@ namespace BASIC
 			void evaluate_for(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_end(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_goto(const std::shared_ptr<parse_tree::node> &root);
+			void evaluate_gosub(const std::shared_ptr<parse_tree::node> &root);
+			void evaluate_return(const std::shared_ptr<parse_tree::node> &root);
+			void evaluate_pop(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_if(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_input(const std::shared_ptr<parse_tree::node> &root);
 			bool evaluate_print(const std::shared_ptr<parse_tree::node> &root);

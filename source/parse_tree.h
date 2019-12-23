@@ -81,10 +81,15 @@ namespace BASIC
 			std::shared_ptr<node> parse_for(void);
 			std::shared_ptr<node> parse_end(void);
 			std::shared_ptr<node> parse_goto(void);
+			std::shared_ptr<node> parse_gosub(void);
+			std::shared_ptr<node> parse_return(void);
+			std::shared_ptr<node> parse_pop(void);
 			std::shared_ptr<node> parse_if(void);
 			std::shared_ptr<node> parse_input(void);
 			std::shared_ptr<node> parse_print(void);
 			std::shared_ptr<node> parse_let(void);
+
+			std::shared_ptr<node> parse_parameterless_statement(const char *command);
 
 		friend std::ostream &operator<<(std::ostream &stream, const std::shared_ptr<parse_tree::node> root);
 

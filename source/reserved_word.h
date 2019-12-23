@@ -27,6 +27,9 @@ namespace BASIC
 			static const char *IF;
 			static const char *THEN;
 			static const char *GOTO;
+			static const char *GOSUB;
+			static const char *RETURN;
+			static const char *POP;
 			static const char *INPUT;
 			static const char *PRINT;
 			static const char *LET;

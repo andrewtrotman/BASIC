@@ -59,6 +59,49 @@ namespace BASIC
 		}
 
 	/*
+		EXECUTIVE::EVALUATE_GOSUB()
+		---------------------------
+	*/
+	void executive::evaluate_gosub(const std::shared_ptr<parse_tree::node> &root)
+		{
+		auto return_address = next_line;
+		size_t next_line_number = static_cast<size_t>(root->left->number);
+		next_line = parsed_code->lower_bound(next_line_number);
+		if (next_line != parsed_code->end())
+			{
+			if (next_line->first != next_line_number)
+				throw error::undefined_statement();
+			else
+				gosub_stack.push_back(return_address);
+			}
+		}
+
+	/*
+		EXECUTIVE::EVALUATE_RETURN()
+		----------------------------
+	*/
+	void executive::evaluate_return(const std::shared_ptr<parse_tree::node> &root)
+		{
+		if (gosub_stack.size() == 0)
+			throw error::return_without_gosub();
+
+		next_line = gosub_stack.back();
+		gosub_stack.pop_back();
+		}
+
+	/*
+		EXECUTIVE::EVALUATE_POP()
+		-------------------------
+	*/
+	void executive::evaluate_pop(const std::shared_ptr<parse_tree::node> &root)
+		{
+		if (gosub_stack.size() <= 0)
+			throw error::return_without_gosub();
+
+		gosub_stack.pop_back();
+		}
+
+	/*
 		EXECUTIVE::EVALUATE_END()
 		-------------------------
 	*/
@@ -271,6 +314,12 @@ namespace BASIC
 			evaluate_next(root);
 		else if (root->operation == reserved_word::GOTO)
 			evaluate_goto(root);
+		else if (root->operation == reserved_word::GOSUB)
+			evaluate_gosub(root);
+		else if (root->operation == reserved_word::RETURN)
+			evaluate_return(root);
+		else if (root->operation == reserved_word::POP)
+			evaluate_pop(root);
 		else if (root->operation == reserved_word::END)
 			evaluate_end(root);
 		else if (root->operation == reserved_word::EQUALS)
