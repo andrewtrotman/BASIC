@@ -11,7 +11,6 @@
 #include "reserved_word.h"
 #include "symbol_table.h"
 
-
 namespace BASIC
 	{
 	/*
