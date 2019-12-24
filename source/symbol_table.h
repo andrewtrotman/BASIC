@@ -4,11 +4,17 @@
 */
 #pragma once
 
+#include <iostream>
 #include <unordered_map>
+
 #include "symbol.h"
+#include "array.h"
+#include "parse_tree.h"
 
 namespace BASIC
 	{
+	class executive;
+
 	/*
 		CLASS SYMBOL_TABLE
 		------------------
@@ -17,24 +23,12 @@ namespace BASIC
 		{
 		private:
 			std::unordered_map<std::string, symbol> table;
+			std::unordered_map<std::string, array> array_table;
+			executive &evaluator;
 
 		public:
-			/*
-				SYMBOL_TABLE::SYMBOL_TABLE()
-				----------------------------
-			*/
-			symbol_table()
-				{
-				/* Nothing */
-				}
-
-			/*
-				SYMBOL_TABLE::OPERATOR[]()
-				--------------------------
-			*/
-			symbol &operator[](const std::string &name)
-				{
-				return table[name];
-				}
+			symbol_table(executive &evaluator);
+			void create_array(const std::string &name, std::vector<size_t>sizes);
+			symbol &operator[](const std::shared_ptr<parse_tree::node> &name);
 		};
 	}

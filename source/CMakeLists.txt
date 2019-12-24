@@ -4,6 +4,7 @@
 #
 
 set(BASIClib_FILES
+	array.h
 	error.h
 	executive.h
 	executive.cpp

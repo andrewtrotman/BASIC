@@ -22,5 +22,6 @@ namespace BASIC
 			class undefined_statement 			{ /* Nothing */ };
 			class next_without_for	 			{ /* Nothing */ };
 			class return_without_gosub	 		{ /* Nothing */ };
+			class bad_subscript_error	 		{ /* Nothing */ };
 		};
 	}

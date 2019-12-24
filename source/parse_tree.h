@@ -8,7 +8,6 @@
 #include <iostream>
 
 #include "parser.h"
-#include "symbol_table.h"
 #include "reserved_word.h"
 
 namespace BASIC
@@ -76,7 +75,9 @@ namespace BASIC
 			std::shared_ptr<node> build_tree(std::shared_ptr<node> left = nullptr);
 			std::shared_ptr<node> build_operator(void);
 			std::shared_ptr<node> build_operand(void);
+			std::shared_ptr<node> build_variable(const std::string &name, bool can_be_parameterised = true);
 
+			std::shared_ptr<node> parse_dim(void);
 			std::shared_ptr<node> parse_next(void);
 			std::shared_ptr<node> parse_for(void);
 			std::shared_ptr<node> parse_end(void);
@@ -88,7 +89,7 @@ namespace BASIC
 			std::shared_ptr<node> parse_if(void);
 			std::shared_ptr<node> parse_input(void);
 			std::shared_ptr<node> parse_print(void);
-			std::shared_ptr<node> parse_let(void);
+			std::shared_ptr<node> parse_let(bool can_be_parameterised = true);
 
 			std::shared_ptr<node> parse_parameterless_statement(const char *command);
 
@@ -107,38 +108,6 @@ namespace BASIC
 		OPERATOR<<()
 		------------
 	*/
-	inline std::ostream &operator<<(std::ostream &stream, const std::shared_ptr<parse_tree::node> root)
-		{
-		if (root->left != nullptr || root->right != nullptr)
-			std::cout << "(";
+	inline std::ostream &operator<<(std::ostream &stream, const std::shared_ptr<parse_tree::node> root);
 
-		if (root->left != nullptr)
-			stream << root->left;
-
-		if (root->type == parse_tree::node::SYMBOL)
-			stream << root->symbol;
-		else if (root->type == parse_tree::node::NUMBER)
-			stream << root->number;
-		else if (root->type == parse_tree::node::STRING)
-			stream << '"' << root->string << '"';
-		else if (root->type == parse_tree::node::OPERATOR)
-			stream << root->operation;
-		else if (root->type == parse_tree::node::COMMAND)
-			{
-			if (root->operation == reserved_word::PRINT)
-				stream << "PRINT ";
-			if (root->operation == reserved_word::IF)
-				stream << "IF ";
-			if (root->operation == reserved_word::EQUALS)
-				stream << " = ";
-			}
-
-		if (root->right != nullptr)
-			stream << root->right;
-
-		if (root->left != nullptr || root->right != nullptr)
-			std::cout << ")";
-
-		return stream;
-		}
 	}

@@ -9,6 +9,7 @@ namespace BASIC
 	/*
 		Reserved words
 	*/
+	const char *reserved_word::DIM = "dim";
 	const char *reserved_word::FOR = "for";
 	const char *reserved_word::TO = "to";
 	const char *reserved_word::STEP = "step";
@@ -56,6 +57,7 @@ namespace BASIC
 		{std::string(QUESTIONMARK), QUESTIONMARK},
 		{std::string(LET), LET},
 		{std::string(END), END},
+		{std::string(DIM), DIM},
 		{std::string(FOR), FOR},
 		{std::string(TO), TO},
 		{std::string(STEP), STEP},

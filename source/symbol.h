@@ -7,6 +7,7 @@
 #include <ctype.h>
 
 #include <string>
+#include <vector>
 
 #include "error.h"
 

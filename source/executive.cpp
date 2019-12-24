@@ -138,12 +138,26 @@ namespace BASIC
 	void executive::evaluate_for(const std::shared_ptr<parse_tree::node> &root)
 		{
 		evaluate(root->left);
-		symbol &from = symbol_table[root->left->left->symbol];
+		symbol &from = symbol_table[root->left->left];
 		symbol to = evaluate_expression(root->right->left);
 		symbol step = evaluate_expression(root->right->right);
 		for_stack.push_back(for_tuple(root->left->left->symbol, from, to, step, next_line));
 		}
 
+	/*
+		EXECUTIVE::EVALUATE_DIM()
+		-------------------------
+	*/
+	void executive::evaluate_dim(const std::shared_ptr<parse_tree::node> &root)
+		{
+		std::vector<size_t> sizes;
+
+		auto name = root->left->string;
+		for (auto current = root->right; current != nullptr; current = current->right)
+			sizes.push_back(evaluate_expression(current->left));
+
+		symbol_table.create_array(name, sizes);
+		}
 
 	/*
 		EXECUTIVE::STEP()
@@ -225,7 +239,7 @@ namespace BASIC
 		char input[1024];
 
 		std::cout << the_root->left->string;
-		std::shared_ptr<parse_tree::node> root = root->right;
+		std::shared_ptr<parse_tree::node> root = the_root->right;
 
 		while (1)
 			{
@@ -253,13 +267,13 @@ namespace BASIC
 				else if (*ch == '"')
 					{
 					ch++;
-					while (*ch != '"' && *ch != '\0')
+					while (*ch != '"' && *ch != '\0' && *ch != '\n' && *ch != '\r')
 						ch++;
 					if (*ch == '"')
 						ch++;
 					}
 				else
-					while (*ch != ',' && *ch != '\0')
+					while (*ch != ',' && *ch != '\0' && *ch != '\n' && *ch != '\r')
 						ch++;
 
 				/*
@@ -275,11 +289,11 @@ namespace BASIC
 					*ch++ = '\0';
 
 				if (isdigit(*start))
-					symbol_table[root->symbol] = atof(start);
+					symbol_table[root->left] = atof(start);
 				else if (*start == '"')
-					symbol_table[root->symbol] = std::string(start + 1, strlen(start + 1) - 1);
+					symbol_table[root->left] = std::string(start + 1, strlen(start + 1) - 1);
 				else
-					symbol_table[root->symbol] = std::string(start);
+					symbol_table[root->left] = std::string(start);
 					
 				/*
 					next variable.
@@ -334,9 +348,11 @@ namespace BASIC
 		else if (root->operation == reserved_word::END)
 			evaluate_end(root);
 		else if (root->operation == reserved_word::EQUALS)
-			symbol_table[root->left->symbol] = symbol(evaluate_expression(root->right));
+			symbol_table[root->left] = symbol(evaluate_expression(root->right));
 		else if (root->operation == reserved_word::REM)
 			evaluate_rem(root);
+		else if (root->operation == reserved_word::DIM)
+			evaluate_dim(root);
 		}
 
 	/*
@@ -352,7 +368,7 @@ namespace BASIC
 		else if (root->type == parse_tree::node::NUMBER)
 			return root->number;
 		else if (root->type == parse_tree::node::SYMBOL)
-			return symbol_table[root->symbol];
+			return symbol_table[root];
 		else if (root->type == parse_tree::node::OPERATOR)
 			{
 			auto left = evaluate_expression(root->left);

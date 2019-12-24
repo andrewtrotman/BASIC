@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "symbol.h"
+#include "symbol_table.h"
 #include "parse_tree.h"
 
 namespace BASIC
@@ -52,6 +53,7 @@ namespace BASIC
 
 		protected:
 			bool step(int64_t which_for_loop);
+			void evaluate_dim(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_next(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_for(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_end(const std::shared_ptr<parse_tree::node> &root);
@@ -65,14 +67,16 @@ namespace BASIC
 			bool evaluate_print(const std::shared_ptr<parse_tree::node> &root);
 
 			void evaluate_command(const std::shared_ptr<parse_tree::node> &root);
-			symbol evaluate_expression(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate(const std::shared_ptr<parse_tree::node> &root);
 
 		public:
-			executive()
+			executive() :
+				symbol_table(*this)
 				{
 				/* Nothing */
 				}
+				
 			void evaluate(const program &parsed_code, size_t start_line = 0);
+			symbol evaluate_expression(const std::shared_ptr<parse_tree::node> &root);
 		};
 	}
