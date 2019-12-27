@@ -77,6 +77,9 @@ namespace BASIC
 			std::shared_ptr<node> build_operand(void);
 			std::shared_ptr<node> build_variable(const std::string &name, bool can_be_parameterised = true);
 
+			std::shared_ptr<node> parse_read(void);
+			std::shared_ptr<node> parse_data(void);
+			std::shared_ptr<node> parse_restore(void);
 			std::shared_ptr<node> parse_dim(void);
 			std::shared_ptr<node> parse_next(void);
 			std::shared_ptr<node> parse_for(void);

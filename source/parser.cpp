@@ -17,6 +17,7 @@ namespace BASIC
 	*/
 	const char *parser::get_next_token(void)
 		{
+		was = where;
 		size_t length = ::strlen(next_token_buffer.data());
 		std::copy(next_token_buffer.data(), next_token_buffer.data() + length, token_buffer.data());
 		token_buffer[length] = '\0';
@@ -83,13 +84,35 @@ namespace BASIC
 
 		return token_buffer.data();
 		}
-		
+
 	/*
-		PARSER::PEEK_NEXT_TOKEN()
+		PARSER::COMMA_SEPERATED()
 		-------------------------
+		from [in/out], where to parse from, and where we ended up
 	*/
-	const char *parser::peek_next_token(void)
+	std::string parser::comma_seperated(const char **from)
 		{
-		return next_token_buffer.data();
+		const char *where = *from;
+
+		while (::isspace(*where))
+			where++;
+
+		auto start_of_token = where;
+
+		if (*where == '"')
+				{
+				where++;
+				while (*where != '\0' && *where != '"')
+					where++;
+				}
+		else if (*where == ',')
+			where++;
+		else
+			while (*where != '\0' && *where != ',')
+				where++;
+
+		*from = where;
+
+		return std::string(start_of_token, *from - start_of_token);
 		}
 	}

@@ -113,6 +113,37 @@ namespace BASIC
 		}
 
 	/*
+		EXECUTIVE::EVALUATE_DATA()
+		--------------------------
+	*/
+	void executive::evaluate_data(const std::shared_ptr<parse_tree::node> &root)
+		{
+		/*
+			Nothing
+		*/
+		}
+
+	/*
+		EXECUTIVE::EVALUATE_RESTORE()
+		-----------------------------
+	*/
+	void executive::evaluate_restore(const std::shared_ptr<parse_tree::node> &root)
+		{
+		data_pointer = nullptr;
+		}
+
+	/*
+		EXECUTIVE::EVALUATE_READ()
+		--------------------------
+	*/
+	void executive::evaluate_read(const std::shared_ptr<parse_tree::node> &root)
+		{
+		/*
+			Not Implemented Yet
+		*/
+		 }
+
+	/*
 		EXECUTIVE::EVALUATE_END()
 		-------------------------
 	*/
@@ -337,6 +368,14 @@ namespace BASIC
 			evaluate_for(root);
 		else if (root->operation == reserved_word::NEXT)
 			evaluate_next(root);
+		else if (root->operation == reserved_word::GOTO)
+			evaluate_goto(root);
+		else if (root->operation == reserved_word::DATA)
+			evaluate_data(root);
+		else if (root->operation == reserved_word::RESTORE)
+			evaluate_restore(root);
+		else if (root->operation == reserved_word::READ)
+			evaluate_read(root);
 		else if (root->operation == reserved_word::GOTO)
 			evaluate_goto(root);
 		else if (root->operation == reserved_word::GOSUB)

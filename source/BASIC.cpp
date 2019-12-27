@@ -17,20 +17,11 @@ int main(int argc, char *argv[])
 	try
 		{
 		std::string line;
-		program[1] = parser.build("a=5");
-		program[10] = parser.build("gosub 100");
-		program[20] = parser.build("? 20");
-		program[30] = parser.build("dim array(10,10,10)");
-		program[31] = parser.build("array(5,5,5) = 9");
-		program[32] = parser.build("? array(5,5,5)");
-		program[33] = parser.build("input array(4,a,6)");
-		program[34] = parser.build("? array(4,5,6)");
-		program[35] = parser.build("? array(5,5,5)");
-		program[39] = parser.build("end");
-		program[40] = parser.build("? 40");
-		program[100] = parser.build("?100");
-		program[105] = parser.build("rem pop");
-		program[110] = parser.build("return");
+
+		program[10] = parser.build("read a, b");
+		program[20] = parser.build("? a, b");
+		program[100] = parser.build("data =   >  , 4");
+
 		eval.evaluate(program);
 		}
 	catch (BASIC::error::syntax)

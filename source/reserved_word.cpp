@@ -9,6 +9,9 @@ namespace BASIC
 	/*
 		Reserved words
 	*/
+	const char *reserved_word::READ = "read";
+	const char *reserved_word::DATA = "data";
+	const char *reserved_word::RESTORE = "restore";
 	const char *reserved_word::DIM = "dim";
 	const char *reserved_word::FOR = "for";
 	const char *reserved_word::TO = "to";
@@ -55,6 +58,9 @@ namespace BASIC
 		{std::string(COMMA), COMMA},
 		{std::string(SEMICOLON), SEMICOLON},
 		{std::string(QUESTIONMARK), QUESTIONMARK},
+		{std::string(READ), READ},
+		{std::string(DATA), DATA},
+		{std::string(RESTORE), RESTORE},
 		{std::string(LET), LET},
 		{std::string(END), END},
 		{std::string(DIM), DIM},

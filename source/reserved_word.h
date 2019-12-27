@@ -19,6 +19,9 @@ namespace BASIC
 			/*
 				List of known reserved words
 			*/
+			static const char *DATA;
+			static const char *READ;
+			static const char *RESTORE;
 			static const char *FOR;
 			static const char *DIM;
 			static const char *TO;

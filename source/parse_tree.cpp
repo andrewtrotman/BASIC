@@ -272,6 +272,81 @@ namespace BASIC
 		}
 
 	/*
+		PARSE_TREE::PARSE_READ()
+		------------------------
+		READ var [{,var}]
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_read(void)
+		{
+		std::shared_ptr<parse_tree::node> command(new node);
+
+		parser.get_next_token();
+		command->type = node::COMMAND;
+		command->operation = reserved_word::READ;
+
+		command->right = std::shared_ptr<parse_tree::node>(new node);
+		auto at = command->right;
+		do
+			{
+			auto variable = parser.get_next_token();
+			if (!isalpha(*variable))
+				throw error::syntax();
+
+			at->left = build_variable(variable);
+			auto token = reserved_word::translate(parser.peek_next_token());
+			if (*token == '\0')
+				break;
+			if (token != reserved_word::COMMA)
+				throw error::syntax();
+			reserved_word::translate(parser.get_next_token());
+			at->right = std::shared_ptr<parse_tree::node>(new node);
+			at = at->right;
+			}
+		while (1);
+
+		return command;
+		}
+
+	/*
+		PARSE_TREE::PARSE_DATA()
+		------------------------
+		DATA [literal|string|real|integer] {, [literal|string|real|integer]}
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_data(void)
+		{
+		std::shared_ptr<parse_tree::node> command(new node);
+
+		parser.get_next_token();
+		command->type = node::COMMAND;
+		command->operation = reserved_word::DATA;
+
+		command->right = std::shared_ptr<parse_tree::node>(new node);
+		auto at = command->right;
+		const char *value = parser.get_cursor();
+		do
+			{
+			auto part = parser.comma_seperated(&value);
+
+			at->left = std::shared_ptr<parse_tree::node>(new node);
+			at->left->type = node::STRING;
+			at->left->string = part;
+
+			part = parser.comma_seperated(&value);
+			if (part.size() == 0)
+				break;
+			if (part != reserved_word::COMMA)
+				throw error::syntax();
+			at->right = std::shared_ptr<parse_tree::node>(new node);
+			at = at->right;
+			}
+		while (1);
+
+		parser.set_cursor(value);
+
+		return command;
+		}
+
+	/*
 		PARSE_TREE::PARSE_FOR()
 		-----------------------
 		FOR real avar = aexpr1 TO aexpr2 [STEP expr3]
@@ -471,6 +546,16 @@ namespace BASIC
 		}
 
 	/*
+		PARSE_TREE::PARSE_RESTORE()
+		---------------------------
+		RESTORE
+	*/
+	std::shared_ptr<parse_tree::node> parse_tree::parse_restore(void)
+		{
+		return parse_parameterless_statement(reserved_word::RESTORE);
+		}
+
+	/*
 		PARSE_TREE::PARSE_REM()
 		-----------------------
 		REM {character|"}
@@ -584,6 +669,12 @@ namespace BASIC
 			return parse_if();
 		else if (command == reserved_word::GOTO)
 			return parse_goto();
+		else if (command == reserved_word::READ)
+			return parse_read();
+		else if (command == reserved_word::DATA)
+			return parse_data();
+		else if (command == reserved_word::RESTORE)
+			return parse_restore();
 		else if (command == reserved_word::GOSUB)
 			return parse_gosub();
 		else if (command == reserved_word::RETURN)

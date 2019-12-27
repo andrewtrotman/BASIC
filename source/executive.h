@@ -31,6 +31,7 @@ namespace BASIC
 					symbol &variable;
 					double to;
 					double step;
+
 				public:
 					for_tuple(const std::string &variable_name, symbol &variable, double to, double step, program::const_iterator line) :
 						variable_name(variable_name),
@@ -50,9 +51,13 @@ namespace BASIC
 			bool end;
 			std::vector<for_tuple> for_stack;
 			std::vector<program::const_iterator> gosub_stack;
+			program *data_pointer;
 
 		protected:
 			bool step(int64_t which_for_loop);
+			void evaluate_data(const std::shared_ptr<parse_tree::node> &root);
+			void evaluate_restore(const std::shared_ptr<parse_tree::node> &root);
+			void evaluate_read(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_dim(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_next(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_for(const std::shared_ptr<parse_tree::node> &root);
@@ -73,7 +78,7 @@ namespace BASIC
 			executive() :
 				symbol_table(*this)
 				{
-				/* Nothing */
+				data_pointer = nullptr;
 				}
 				
 			void evaluate(const program &parsed_code, size_t start_line = 0);
