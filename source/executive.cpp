@@ -7,6 +7,7 @@
 
 #include "error.h"
 #include "executive.h"
+#include "symbol_table.h"
 #include "reserved_word.h"
 
 namespace BASIC
@@ -133,15 +134,54 @@ namespace BASIC
 		}
 
 	/*
+		EXECUTIVE::EVALUATE_READ_ONE()
+		------------------------------
+	*/
+	symbol executive::evaluate_read_one(void)
+		{
+		if (data_pointer == nullptr)
+			for (data_pointer_line = parsed_code->begin(); data_pointer_line != parsed_code->end(); ++data_pointer_line)
+				if (data_pointer_line->second->operation == reserved_word::DATA)
+					{
+					data_pointer = data_pointer_line->second->right;
+					break;
+					}
+
+		if (data_pointer == nullptr)
+			throw error::out_of_data_error();
+
+		auto source = data_pointer->left->string;
+		data_pointer = data_pointer->right;
+
+		if (data_pointer == nullptr)
+			{
+			while (data_pointer_line != parsed_code->end())
+				if (data_pointer_line->second->operation == reserved_word::DATA)
+					{
+					data_pointer = data_pointer_line->second;
+					break;
+					}
+			}
+		if (data_pointer == nullptr)
+			throw error::out_of_data_error();
+
+		if (::isdigit(source[0]))
+			return symbol(atof(source.c_str()));
+		else if (source[0] == '"')
+			return symbol(source.substr(1, source.size() - 2));
+		else
+			return symbol(source);
+		}
+
+	/*
 		EXECUTIVE::EVALUATE_READ()
 		--------------------------
 	*/
 	void executive::evaluate_read(const std::shared_ptr<parse_tree::node> &root)
 		{
-		/*
-			Not Implemented Yet
-		*/
-		 }
+		for (auto node = root->right; node != nullptr; node = node->right)
+			symbol_table[node->left] = evaluate_read_one();
+		}
 
 	/*
 		EXECUTIVE::EVALUATE_END()

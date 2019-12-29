@@ -23,5 +23,6 @@ namespace BASIC
 			class next_without_for	 			{ /* Nothing */ };
 			class return_without_gosub	 		{ /* Nothing */ };
 			class bad_subscript_error	 		{ /* Nothing */ };
+			class out_of_data_error		 		{ /* Nothing */ };
 		};
 	}

@@ -51,9 +51,11 @@ namespace BASIC
 			bool end;
 			std::vector<for_tuple> for_stack;
 			std::vector<program::const_iterator> gosub_stack;
-			program *data_pointer;
+			std::shared_ptr<parse_tree::node> data_pointer;
+			program::const_iterator data_pointer_line;
 
 		protected:
+			symbol evaluate_read_one(void);
 			bool step(int64_t which_for_loop);
 			void evaluate_data(const std::shared_ptr<parse_tree::node> &root);
 			void evaluate_restore(const std::shared_ptr<parse_tree::node> &root);

@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 		std::string line;
 
 		program[10] = parser.build("read a, b");
-		program[20] = parser.build("? a, b");
+		program[20] = parser.build("? \"[\";a;\"]\", \"[\";b;\"]\"");
 		program[100] = parser.build("data =   >  , 4");
 
 		eval.evaluate(program);
