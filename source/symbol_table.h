@@ -9,11 +9,11 @@
 
 #include "symbol.h"
 #include "array.h"
-#include "parse_tree.h"
 
 namespace BASIC
 	{
 	class executive;
+	class parse_tree_node;
 
 	/*
 		CLASS SYMBOL_TABLE
@@ -29,6 +29,6 @@ namespace BASIC
 		public:
 			symbol_table(executive &evaluator);
 			void create_array(const std::string &name, std::vector<size_t>sizes);
-			symbol &operator[](const std::shared_ptr<parse_tree::node> &name);
+			symbol &operator[](const std::shared_ptr<parse_tree_node> &name);
 		};
 	}

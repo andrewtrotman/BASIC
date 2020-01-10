@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <string>
 
+#include "executive.h"
+
 namespace BASIC
 	{
 	/*
@@ -69,11 +71,12 @@ namespace BASIC
 				Map from an operator to its precidence (higher is higher precidence)
 			*/
 			static const std::unordered_map<const char *, size_t> all_precidence;
+			static const std::unordered_map<decltype(&executive::evaluate_plus), size_t> all_precidence_functions;
 
 			/*
 				Map from a symbol to an operator
 			*/
-			static const std::unordered_map<const char *, bool> all_operators;
+			static const std::unordered_map<const char *, decltype(&executive::evaluate_plus) > all_operators;
 
 		public:
 			/*
@@ -91,10 +94,17 @@ namespace BASIC
 			static size_t precidence(const char *token);
 
 			/*
+				RESERVED_WORD::PRECIDENCE()
+				--------------------------
+				Return the precidence of the given operator
+			*/
+			static size_t precidence(decltype(&executive::evaluate_plus));
+
+			/*
 				RESERVED_WORD::ISOPERATOR()
 				---------------------------
 				Return true if the symbol is an arithmetic operator
 			*/
-			static bool isoperator(const char *token);
+			static decltype(&executive::evaluate_plus) isoperator(const char *token);
 		};
 	}

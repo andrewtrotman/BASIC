@@ -12,6 +12,7 @@ set(BASIClib_FILES
 	parser.cpp
 	parse_tree.h
 	parse_tree.cpp
+	parse_tree_node.h
 	reserved_word.h
 	reserved_word.cpp
 	symbol.h

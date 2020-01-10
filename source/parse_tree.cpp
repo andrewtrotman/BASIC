@@ -8,6 +8,8 @@
 #include "error.h"
 #include "parser.h"
 #include "parse_tree.h"
+#include "parse_tree_node.h"
+#include "executive.h"
 #include "reserved_word.h"
 #include "symbol_table.h"
 
@@ -17,10 +19,10 @@ namespace BASIC
 		PARSE_TREE::BUILD_VARIABLE()
 		----------------------------
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::build_variable(const std::string &name, bool can_be_parameterised)
+	std::shared_ptr<parse_tree_node> parse_tree::build_variable(const std::string &name, bool can_be_parameterised)
 		{
-		std::shared_ptr<node> new_node(new node);
-		new_node->type = node::SYMBOL;
+		std::shared_ptr<parse_tree_node> new_node(new parse_tree_node);
+		new_node->type = parse_tree_node::SYMBOL;
 		new_node->symbol = name;
 		if (can_be_parameterised && reserved_word::translate(parser.peek_next_token()) == reserved_word::OPEN_BRACKET)
 			{
@@ -28,7 +30,7 @@ namespace BASIC
 				An array reference or a function call
 			*/
 			parser.get_next_token();
-			auto next = new_node->right = std::shared_ptr<node>(new node);
+			auto next = new_node->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 			std::string token;
 			do
 				{
@@ -36,7 +38,7 @@ namespace BASIC
 				token = reserved_word::translate(parser.get_next_token());			// comma
 				if (token == reserved_word::CLOSE_BRACKET)
 					break;
-				next->right = std::shared_ptr<parse_tree::node>(new node);
+				next->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 				next = next->right;
 				}
 			while (token == reserved_word::COMMA);
@@ -51,13 +53,13 @@ namespace BASIC
 		PARSE_TREE::BUILD_OPERAND()
 		---------------------------
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::build_operand(void)
+	std::shared_ptr<parse_tree_node> parse_tree::build_operand(void)
 		{
 		const char *token = reserved_word::translate(parser.get_next_token());
 
 		if (token == reserved_word::OPEN_BRACKET)
 			{
-			std::shared_ptr<node> child = build();
+			std::shared_ptr<parse_tree_node> child = build();
 			auto close = reserved_word::translate(parser.get_next_token());		//consume the close bracket.
 			if (close != reserved_word::CLOSE_BRACKET)
 				throw error::syntax();
@@ -65,8 +67,8 @@ namespace BASIC
 			}
 		else if (::isdigit(*token))
 			{
-			std::shared_ptr<node> new_node(new node);
-			new_node->type = node::NUMBER;
+			std::shared_ptr<parse_tree_node> new_node(new parse_tree_node);
+			new_node->type = parse_tree_node::NUMBER;
 			new_node->number = atof(token);
 			return new_node;
 			}
@@ -74,25 +76,25 @@ namespace BASIC
 			return build_variable(token);
 		else if (*token == '"')
 			{
-			std::shared_ptr<node> new_node(new node);
-			new_node->type = node::STRING;
+			std::shared_ptr<parse_tree_node> new_node(new parse_tree_node);
+			new_node->type = parse_tree_node::STRING;
 			new_node->string = std::string(token);
 			new_node->string = new_node->string.substr(1, new_node->string.length() - 2);
 			return new_node;
 			}
 		else if (token == reserved_word::MINUS)			// Unary minus
 			{
-			std::shared_ptr<node> new_node(new node);
-			new_node->type = node::OPERATOR;
-			new_node->operation = reserved_word::UNARY_MINUS;
+			std::shared_ptr<parse_tree_node> new_node(new parse_tree_node);
+			new_node->type = parse_tree_node::OPERATOR;
+			new_node->operation = &executive::evaluate_unary_minus;
 			new_node->right = build_operand();
 			return new_node;
 			}
 		else if (token == reserved_word::PLUS)			// Unary plus
 			{
-			std::shared_ptr<node> new_node(new node);
-			new_node->type = node::OPERATOR;
-			new_node->operation = reserved_word::UNARY_PLUS;
+			std::shared_ptr<parse_tree_node> new_node(new parse_tree_node);
+			new_node->type = parse_tree_node::OPERATOR;
+			new_node->operation = &executive::evaluate_unary_plus;
 			new_node->right = build_operand();
 			return new_node;
 			}
@@ -104,14 +106,14 @@ namespace BASIC
 		PARSE_TREE::BUILD_OPERATOR()
 		----------------------------
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::build_operator(void)
+	std::shared_ptr<parse_tree_node> parse_tree::build_operator(void)
 		{
 		const char *token = reserved_word::translate(parser.get_next_token());
-		if (reserved_word::isoperator(token))
+		if (auto function = reserved_word::isoperator(token))
 			{
-			std::shared_ptr<node> new_node(new node);
-			new_node->type = node::OPERATOR;
-			new_node->operation = token;
+			std::shared_ptr<parse_tree_node> new_node(new parse_tree_node);
+			new_node->type = parse_tree_node::OPERATOR;
+			new_node->operation = function;
 			return new_node;
 			}
 		else
@@ -122,7 +124,7 @@ namespace BASIC
 		PARSE_TREE::BUILD_TREE()
 		------------------------
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::build_tree(std::shared_ptr<node> left)
+	std::shared_ptr<parse_tree_node> parse_tree::build_tree(std::shared_ptr<parse_tree_node> left)
 		{
 		while (1)
 			{
@@ -132,8 +134,8 @@ namespace BASIC
 			if (operation == reserved_word::CLOSE_BRACKET)
 				return left;
 
-			std::shared_ptr<parse_tree::node> middle = build_operator();
-			std::shared_ptr<parse_tree::node> right = build_operand();
+			std::shared_ptr<parse_tree_node> middle = build_operator();
+			std::shared_ptr<parse_tree_node> right = build_operand();
 
 			const char *next_operator  = reserved_word::translate(parser.peek_next_token());
 
@@ -157,14 +159,14 @@ namespace BASIC
 		PARSE_TREE::BUILD()
 		-------------------
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::build(void)
+	std::shared_ptr<parse_tree_node> parse_tree::build(void)
 		{
-		std::shared_ptr<parse_tree::node> left = build_operand();
+		std::shared_ptr<parse_tree_node> left = build_operand();
 
 		const char *token;
 		do
 			{
- 			std::shared_ptr<parse_tree::node> root = build_tree(left);
+ 			std::shared_ptr<parse_tree_node> root = build_tree(left);
 
 			token = reserved_word::translate(parser.peek_next_token());
 			if (reserved_word::precidence(token) == 0)
@@ -186,13 +188,13 @@ namespace BASIC
 		PRINT {;}
 		PRINT {,}
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_print(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_print(void)
 		{
-		std::shared_ptr<parse_tree::node> print(new node);
+		std::shared_ptr<parse_tree_node> print(new parse_tree_node);
 
 		parser.get_next_token();
-		print->type = node::COMMAND;
-		print->operation = reserved_word::PRINT;
+		print->type = parse_tree_node::COMMAND;
+		print->command = &executive::evaluate_print;
 
 		auto token = reserved_word::translate(parser.peek_next_token());
 		if (*token == '\0')
@@ -205,12 +207,12 @@ namespace BASIC
 		if (token == reserved_word::COMMA)
 			{
 			print->right = parse_print();
-			print->right->operation = reserved_word::COMMA;
+			print->right->command = &executive::evaluate_print_comma;
 			}
 		else if (token == reserved_word::SEMICOLON)
 			{
 			print->right = parse_print();
-			print->right->operation = reserved_word::SEMICOLON;
+			print->right->command = &executive::evaluate_print_semicolon;
 			}
 		else if (*token == '\0')
 			return print;
@@ -225,14 +227,14 @@ namespace BASIC
 		-------------------------
 		INPUT [string;] var [{,var}]
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_input(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_input(void)
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();
-		command->type = node::COMMAND;
-		command->operation = reserved_word::INPUT;
-		command->left = std::shared_ptr<parse_tree::node>(new node);
+		command->type = parse_tree_node::COMMAND;
+		command->command = &executive::evaluate_input;
+		command->left = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 
 		auto token = reserved_word::translate(parser.peek_next_token());
 		if (*token == '\0')
@@ -248,7 +250,7 @@ namespace BASIC
 		else
 			command->left->string = "?";
 
-		command->right = std::shared_ptr<parse_tree::node>(new node);
+		command->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 		auto at = command->right;
 		do
 			{
@@ -263,7 +265,7 @@ namespace BASIC
 			if (token != reserved_word::COMMA)
 				throw error::syntax();
 			reserved_word::translate(parser.get_next_token());
-			at->right = std::shared_ptr<parse_tree::node>(new node);
+			at->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 			at = at->right;
 			}
 		while (1);
@@ -276,15 +278,15 @@ namespace BASIC
 		------------------------
 		READ var [{,var}]
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_read(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_read(void)
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();
-		command->type = node::COMMAND;
-		command->operation = reserved_word::READ;
+		command->type = parse_tree_node::COMMAND;
+		command->command = &executive::evaluate_read;
 
-		command->right = std::shared_ptr<parse_tree::node>(new node);
+		command->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 		auto at = command->right;
 		do
 			{
@@ -299,7 +301,7 @@ namespace BASIC
 			if (token != reserved_word::COMMA)
 				throw error::syntax();
 			reserved_word::translate(parser.get_next_token());
-			at->right = std::shared_ptr<parse_tree::node>(new node);
+			at->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 			at = at->right;
 			}
 		while (1);
@@ -312,23 +314,23 @@ namespace BASIC
 		------------------------
 		DATA [literal|string|real|integer] {, [literal|string|real|integer]}
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_data(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_data(void)
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();
-		command->type = node::COMMAND;
-		command->operation = reserved_word::DATA;
+		command->type = parse_tree_node::COMMAND;
+		command->command = &executive::evaluate_data;
 
-		command->right = std::shared_ptr<parse_tree::node>(new node);
+		command->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 		auto at = command->right;
 		const char *value = parser.get_cursor();
 		do
 			{
 			auto part = parser.comma_seperated(&value);
 
-			at->left = std::shared_ptr<parse_tree::node>(new node);
-			at->left->type = node::STRING;
+			at->left = std::shared_ptr<parse_tree_node>(new parse_tree_node);
+			at->left->type = parse_tree_node::STRING;
 			at->left->string = part;
 
 			part = parser.comma_seperated(&value);
@@ -336,7 +338,7 @@ namespace BASIC
 				break;
 			if (part != reserved_word::COMMA)
 				throw error::syntax();
-			at->right = std::shared_ptr<parse_tree::node>(new node);
+			at->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 			at = at->right;
 			}
 		while (1);
@@ -351,19 +353,19 @@ namespace BASIC
 		-----------------------
 		FOR real avar = aexpr1 TO aexpr2 [STEP expr3]
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_for(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_for(void)
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();			// FOR
-		command->type = node::COMMAND;
-		command->operation = reserved_word::FOR;
+		command->type = parse_tree_node::COMMAND;
+		command->command = &executive::evaluate_for;
 		command->left = parse_let(false);
 		auto token = reserved_word::translate(parser.peek_next_token());
 		if (token == reserved_word::TO)
 			{
 			parser.get_next_token();
-			std::shared_ptr<parse_tree::node> to_step(new node);
+			std::shared_ptr<parse_tree_node> to_step(new parse_tree_node);
 			command->right = to_step;
 			to_step->left = build();		// the to amount
 			token = reserved_word::translate(parser.peek_next_token());
@@ -374,8 +376,8 @@ namespace BASIC
 				}
 			else
 				{
-				to_step->right = std::make_shared<node>();
-				to_step->right->type = node::NUMBER;
+				to_step->right = std::make_shared<parse_tree_node>();
+				to_step->right->type = parse_tree_node::NUMBER;
 				to_step->right->number = 1;
 				}
 			}
@@ -391,14 +393,14 @@ namespace BASIC
 		NEXT [avar]
 		NEXT avar [{,avar}]
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_next(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_next(void)
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();			// FOR
 
-		command->type = node::COMMAND;
-		command->operation = reserved_word::NEXT;
+		command->type = parse_tree_node::COMMAND;
+		command->command = &executive::evaluate_next;
 
 		auto token = parser.peek_next_token();
 		while (isalpha(*token))
@@ -427,27 +429,27 @@ namespace BASIC
 		where
 		subscript := (aexpr [{, aexpr}])
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_dim(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_dim(void)
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();
-		command->type = node::COMMAND;
-		command->operation = reserved_word::DIM;
+		command->type = parse_tree_node::COMMAND;
+		command->command = &executive::evaluate_dim;
 
 		auto variable = reserved_word::translate(parser.get_next_token());
 		if (!isalpha(*variable))
 			throw error::syntax();
 
-		command->left = std::shared_ptr<parse_tree::node>(new node);
-		command->left->type = node::STRING;
+		command->left = std::shared_ptr<parse_tree_node>(new parse_tree_node);
+		command->left->type = parse_tree_node::STRING;
 		command->left->string = variable;
 
 		auto token = reserved_word::translate(parser.get_next_token());
 		if (token != reserved_word::OPEN_BRACKET)
 			throw error::syntax();
 
-		command->right = std::shared_ptr<parse_tree::node>(new node);
+		command->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 
 		auto next = command->right;
 		do
@@ -456,7 +458,7 @@ namespace BASIC
 			token = reserved_word::translate(parser.get_next_token());			// comma
 			if (token == reserved_word::CLOSE_BRACKET)
 				break;
-			next->right = std::shared_ptr<parse_tree::node>(new node);
+			next->right = std::shared_ptr<parse_tree_node>(new parse_tree_node);
 			next = next->right;
 			}
 		while (token == reserved_word::COMMA);
@@ -472,20 +474,20 @@ namespace BASIC
 		------------------------
 		GOTO linenum
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_goto(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_goto(void)
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();
 		auto line_number = parser.get_next_token();
 		if (!isdigit(*line_number))
 			throw error::syntax();
 
-		command->type = node::COMMAND;
-		command->operation = reserved_word::GOTO;
-		std::shared_ptr<parse_tree::node> target_line(new node);
+		command->type = parse_tree_node::COMMAND;
+		command->command = &executive::evaluate_goto;
+		std::shared_ptr<parse_tree_node> target_line(new parse_tree_node);
 		command->left = target_line;
-		target_line->type = node::NUMBER;
+		target_line->type = parse_tree_node::NUMBER;
 		target_line->number = atof(line_number);
 
 		return command;
@@ -496,20 +498,20 @@ namespace BASIC
 		-------------------------
 		GOSUB linenum
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_gosub(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_gosub(void)
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();
 		auto line_number = parser.get_next_token();
 		if (!isdigit(*line_number))
 			throw error::syntax();
 
-		command->type = node::COMMAND;
-		command->operation = reserved_word::GOSUB;
-		std::shared_ptr<parse_tree::node> target_line(new node);
+		command->type = parse_tree_node::COMMAND;
+		command->command = &executive::evaluate_gosub;
+		std::shared_ptr<parse_tree_node> target_line(new parse_tree_node);
 		command->left = target_line;
-		target_line->type = node::NUMBER;
+		target_line->type = parse_tree_node::NUMBER;
 		target_line->number = atof(line_number);
 
 		return command;
@@ -520,9 +522,9 @@ namespace BASIC
 		--------------------------
 		RETURN
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_return(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_return(void)
 		{
-		return parse_parameterless_statement(reserved_word::RETURN);
+		return parse_parameterless_statement(&executive::evaluate_return);
 		}
 
 	/*
@@ -530,9 +532,9 @@ namespace BASIC
 		-----------------------
 		POP
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_pop(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_pop(void)
 		{
-		return parse_parameterless_statement(reserved_word::POP);
+		return parse_parameterless_statement(&executive::evaluate_pop);
 		}
 
 	/*
@@ -540,9 +542,9 @@ namespace BASIC
 		-----------------------
 		END
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_end(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_end(void)
 		{
-		return parse_parameterless_statement(reserved_word::END);
+		return parse_parameterless_statement(&executive::evaluate_end);
 		}
 
 	/*
@@ -550,9 +552,9 @@ namespace BASIC
 		---------------------------
 		RESTORE
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_restore(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_restore(void)
 		{
-		return parse_parameterless_statement(reserved_word::RESTORE);
+		return parse_parameterless_statement(&executive::evaluate_restore);
 		}
 
 	/*
@@ -560,9 +562,9 @@ namespace BASIC
 		-----------------------
 		REM {character|"}
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_rem(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_rem(void)
 		{
-		return parse_parameterless_statement(reserved_word::REM);
+		return parse_parameterless_statement(&executive::evaluate_rem);
 		}
 
 
@@ -571,13 +573,13 @@ namespace BASIC
 		-------------------------------------------
 		construct a node for a command that has no parameters (RETURN, END, etc.)
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_parameterless_statement(const char *statement)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_parameterless_statement(void (executive::*statement)(const std::shared_ptr<parse_tree_node> &root))
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();
-		command->type = node::COMMAND;
-		command->operation = statement;
+		command->type = parse_tree_node::COMMAND;
+		command->command = statement;
 		return command;
 		}
 
@@ -588,13 +590,13 @@ namespace BASIC
 		IF expr THEN [GOTO] linenum
 		IF expr [THEN] GOTO linenum
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_if(void)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_if(void)
 		{
-		std::shared_ptr<parse_tree::node> command(new node);
+		std::shared_ptr<parse_tree_node> command(new parse_tree_node);
 
 		parser.get_next_token();
-		command->type = node::COMMAND;
-		command->operation = reserved_word::IF;
+		command->type = parse_tree_node::COMMAND;
+		command->command = &executive::evaluate_if;
 		command->left = build();
 
 		auto token = reserved_word::translate(parser.peek_next_token());
@@ -607,13 +609,13 @@ namespace BASIC
 				{
 				token = parser.get_next_token();
 
-				std::shared_ptr<parse_tree::node> target(new node);
+				std::shared_ptr<parse_tree_node> target(new parse_tree_node);
 				command->right = target;
-				target->type = node::COMMAND;
-				target->operation = reserved_word::GOTO;
-				std::shared_ptr<parse_tree::node> target_line(new node);
+				target->type = parse_tree_node::COMMAND;
+				target->command = &executive::evaluate_goto;
+				std::shared_ptr<parse_tree_node> target_line(new parse_tree_node);
 				target->left = target_line;
-				target_line->type = node::NUMBER;
+				target_line->type = parse_tree_node::NUMBER;
 				target_line->number = atof(token);
 				}
 			else
@@ -631,11 +633,11 @@ namespace BASIC
 		PARSE_TREE::PARSE_LET()
 		-----------------------
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::parse_let(bool can_be_parameterised)
+	std::shared_ptr<parse_tree_node> parse_tree::parse_let(bool can_be_parameterised)
 		{
-		std::shared_ptr<parse_tree::node> let(new node);
-		let->type = node::COMMAND;
-		let->operation = reserved_word::EQUALS;
+		std::shared_ptr<parse_tree_node> let(new parse_tree_node);
+		let->type = parse_tree_node::COMMAND;
+		let->command = &executive::evaluate_let;
 
 		/*
 			We've got a symbol so its an assignment statemnent.
@@ -656,7 +658,7 @@ namespace BASIC
 		PARSE_TREE::BUILD_COMMAND()
 		---------------------------
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::build_command(void)
+	std::shared_ptr<parse_tree_node> parse_tree::build_command(void)
 		{
 		auto command = reserved_word::translate(parser.peek_next_token());
 		if (command == reserved_word::PRINT)
@@ -699,48 +701,10 @@ namespace BASIC
 		PARSE_TREE::BUILD()
 		-------------------
 	*/
-	std::shared_ptr<parse_tree::node> parse_tree::build(const std::string &string)
+	std::shared_ptr<parse_tree_node> parse_tree::build(const std::string &string)
 		{
 		parser.set_document(string);
 		return build_command();
 		}
 
-	/*
-		OPERATOR<<()
-		------------
-	*/
-	std::ostream &operator<<(std::ostream &stream, const std::shared_ptr<parse_tree::node> root)
-		{
-		if (root->left != nullptr || root->right != nullptr)
-			std::cout << "(";
-
-		if (root->left != nullptr)
-			stream << root->left;
-
-		if (root->type == parse_tree::node::SYMBOL)
-			stream << root->symbol;
-		else if (root->type == parse_tree::node::NUMBER)
-			stream << root->number;
-		else if (root->type == parse_tree::node::STRING)
-			stream << '"' << root->string << '"';
-		else if (root->type == parse_tree::node::OPERATOR)
-			stream << root->operation;
-		else if (root->type == parse_tree::node::COMMAND)
-			{
-			if (root->operation == reserved_word::PRINT)
-				stream << "PRINT ";
-			if (root->operation == reserved_word::IF)
-				stream << "IF ";
-			if (root->operation == reserved_word::EQUALS)
-				stream << " = ";
-			}
-
-		if (root->right != nullptr)
-			stream << root->right;
-
-		if (root->left != nullptr || root->right != nullptr)
-			std::cout << ")";
-
-		return stream;
-		}
 	}

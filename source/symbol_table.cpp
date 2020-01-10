@@ -4,6 +4,7 @@
 */
 #include "symbol_table.h"
 #include "executive.h"
+#include "parse_tree_node.h"
 
 namespace BASIC
 	{
@@ -30,7 +31,7 @@ namespace BASIC
 		SYMBOL_TABLE::OPERATOR[]()
 		--------------------------
 	*/
-	symbol &symbol_table::operator[](const std::shared_ptr<parse_tree::node> &name)
+	symbol &symbol_table::operator[](const std::shared_ptr<parse_tree_node> &name)
 		{
 		if (name->right == nullptr)
 			return table[name->symbol];

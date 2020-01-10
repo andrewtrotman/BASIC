@@ -4,6 +4,20 @@
 */
 #include "reserved_word.h"
 
+using func = BASIC::symbol (BASIC::executive::*)(const std::shared_ptr<BASIC::parse_tree_node> &);
+
+namespace std
+	{
+	template<> struct std::hash<func>
+		{
+		size_t operator()(const func &s) const noexcept
+			{
+			return (size_t)&s;
+			}
+		};
+	}
+
+
 namespace BASIC
 	{
 	/*
@@ -116,21 +130,40 @@ namespace BASIC
 		};
 
 	/*
+		operator precidence matrix
+	*/
+	const std::unordered_map<func, size_t> reserved_word::all_precidence_functions =
+		{
+		{&executive::evaluate_greater_than_equals, 5},
+		{&executive::evaluate_less_than_equals, 5},
+		{&executive::evaluate_greater_than, 6},
+		{&executive::evaluate_less_than, 6},
+		{&executive::evaluate_not_equals, 6},
+		{&executive::evaluate_equals_equals, 6},
+		{&executive::evaluate_plus, 7},
+		{&executive::evaluate_minus, 7},
+		{&executive::evaluate_multiply, 8},
+		{&executive::evaluate_divide, 8},
+		{&executive::evaluate_power, 9},
+		};
+
+
+	/*
 		operator matrix
 	*/
-	const std::unordered_map<const char *, bool> reserved_word::all_operators =
+	const std::unordered_map<const char *, decltype(&executive::evaluate_plus) > reserved_word::all_operators =
 		{
-		{EQUALS, true},
-		{NOT_EQUALS, true},
-		{LESS_THAN, true},
-		{GREATER_THAN, true},
-		{LESS_THAN_EQUALS, true},
-		{GREATER_THAN_EQUALS, true},
-		{PLUS, true},
-		{MINUS, true},
-		{MULTIPLY, true},
-		{DIVIDE, true},
-		{POWER, true},
+		{EQUALS, &executive::evaluate_equals_equals},
+		{NOT_EQUALS, &executive::evaluate_not_equals},
+		{LESS_THAN, &executive::evaluate_less_than},
+		{GREATER_THAN, &executive::evaluate_greater_than},
+		{LESS_THAN_EQUALS, &executive::evaluate_less_than_equals},
+		{GREATER_THAN_EQUALS, &executive::evaluate_greater_than_equals},
+		{PLUS, &executive::evaluate_plus},
+		{MINUS, &executive::evaluate_minus},
+		{MULTIPLY, &executive::evaluate_multiply},
+		{DIVIDE, &executive::evaluate_divide},
+		{POWER, &executive::evaluate_power},
 		};
 
 	/*
@@ -162,16 +195,30 @@ namespace BASIC
 		}
 
 	/*
+		RESERVED_WORD::PRECIDENCE()
+		--------------------------
+	*/
+	size_t reserved_word::precidence(const decltype(&executive::evaluate_plus) token)
+		{
+		auto got = all_precidence_functions.find(token);
+
+		if (got == all_precidence_functions.end())
+			return 0;
+		else
+			return got->second;
+		}
+
+	/*
 		RESERVED_WORD::ISOPERTOR()
 		--------------------------
 	*/
-	bool reserved_word::isoperator(const char *token)
+	decltype(&executive::evaluate_plus) reserved_word::isoperator(const char *token)
 		{
 		auto got = all_operators.find(token);
 
 		if (got == all_operators.end())
-			return false;
+			return nullptr;
 		else
-			return true;
+			return got->second;
 		}
 	}
